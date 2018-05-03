@@ -3,12 +3,10 @@
 <div id="app" style="width:85%;">
   <el-container id="main">
     <el-aside style="width:30%;">
-      <img src="./assets/logo.png" style="vertical-align:middle;">
-    </el-aside>
-    <el-container>
-      <el-header>Header</el-header>
-      <el-main>
-        <router-link to="/">
+      <div>
+        <img src="./assets/logo.png" style="vertical-align:middle;">
+      </div>
+      <router-link to="/">
           <el-button @click="startHacking" type="primary">Star</el-button>
         </router-link>
         <router-link to="/add">
@@ -17,13 +15,19 @@
         <router-link to="/ec">
           <el-button type="success">EC</el-button>
         </router-link>
+    </el-aside>
+    <el-container>
+      <el-header>Header</el-header>
+      <el-main>
+        <center>
+          <router-view/>
+        </center>
       </el-main>
     </el-container>
   </el-container>
   <div>
     <!--router-link :to="{ name: 'HelloWorld' }"-->
   </div>
-  <router-view/>
 </div>
 </center>
 
@@ -73,15 +77,15 @@ export default {
   background-color: #D3DCE6;
   color: #333;
   text-align: center;
-  line-height: 500px;
+  line-height: 250px;
   margin-right: 5px;
 }
 
 .el-main {
   background-color: #E9EEF3;
   color: #333;
-  text-align: center;
-  line-height: 450px;
+  /*text-align: center;*/
+  /*line-height: 450px;*/
 }
 
 body>.el-container {
