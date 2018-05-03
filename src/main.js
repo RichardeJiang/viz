@@ -1,0 +1,29 @@
+// The Vue build version to load with the `import` command
+// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
+import Vue from 'vue'
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+// import IEcharts from 'vue-echarts-v3/src/full.js';
+
+import ECharts from 'vue-echarts/components/ECharts'
+
+// import ECharts modules manually to reduce bundle size
+import 'echarts/lib/chart/bar'
+import 'echarts/lib/component/tooltip'
+
+import App from './App'
+import router from './router'
+
+Vue.config.productionTip = false
+Vue.use(ElementUI)
+
+Vue.component('chart', ECharts)
+// Vue.use(ECharts)
+
+/* eslint-disable no-new */
+new Vue({
+  el: '#app',
+  router,
+  components: { App },
+  template: '<App/>'
+})
