@@ -13,6 +13,8 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "ajv": "^6.4.0",
+    "axios": "^0.18.0",
     "element-ui": "^2.3.4",
     "vue": "^2.5.2",
     "vue-echarts": "^3.0.7",
