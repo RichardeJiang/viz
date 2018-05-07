@@ -8,16 +8,27 @@
 }
 </style>
 
+<!--script>
+import router from '../router'
+
+export default {
+  name: "EC",
+  created() {
+    this.id = this.$route.params.id;
+    if(this.$route.query.debug) {
+        this.debug = this.$route.query.debug;
+    }
+  },
+  data: function() {
+
+  }
+}
+</script-->
+
 <script>
 export default {
   data: function () {
     let data = []
-
-    // for (let i = 0; i <= 360; i++) {
-    //     let t = i / 180 * Math.PI
-    //     let r = Math.sin(2 * t) * Math.cos(2 * t)
-    //     data.push([r, i])
-    // }
 
     for (let i = 0; i <= 360; i++) {
       let t = i / 180 * Math.PI + Math.PI

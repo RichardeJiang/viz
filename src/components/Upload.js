@@ -14,8 +14,9 @@ function upload(formData) {
 	  data: formData,
 	  config: { headers: {'Content-Type': 'multipart/form-data' }}
 	}).then(function (response) {
-	    console.log(response);
-	    console.log(response.data);
+		return response.data;
+	    // console.log(response);
+	    // console.log(response.data);
 	}).catch(function (error) {
 	    console.log(error);
 	});

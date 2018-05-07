@@ -77,7 +77,8 @@ export default {
         uploadedFiles: [],
         uploadError: null,
         currentStatus: null,
-        uploadFieldName: 'file'
+        uploadFieldName: 'file',
+        testEChartsDataInput: null
       };
   },
   computed: {
@@ -115,7 +116,9 @@ export default {
 
       upload(formData)
         .then(x => {
-          this.uploadedFiles = [].concat(x);
+          // console.log("inside success function!")
+          console.log(x);
+          // this.uploadedFiles = [].concat(x);
           this.currentStatus = STATUS_SUCCESS;
         })
         .catch(err => {
