@@ -4,7 +4,7 @@
 
 <style>
 .echarts {
-  height: 600px;
+  height: 90%;
 }
 </style>
 
