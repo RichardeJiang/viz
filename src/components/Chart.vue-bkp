@@ -26,6 +26,64 @@ export default {
   name: 'Chart',
   props: ['chartData'],
   data: function () {
+    // var noInput = true;
+    // var dataInput = {};
+    // var type = 'line';
+    // var msg = 'No Input Detected';
+    // if (typeof this.chartData != 'undefined') {
+    //   msg = 'Chart View Component';
+    //   var yearInfo = this.chartData.year;
+    //   var inCitations = this.chartData.inCitations;
+    //   var outCitations = this.chartData.outCitations;
+    //   dataInput = {
+    //     labels: yearInfo,
+    //     datasets: [
+    //       {
+    //         label: 'inCitations',
+    //         // backgroundColor: '#f87979',
+    //         pointBackgroundColor: 'white',
+    //         borderWidth: 1,
+    //         pointBorderColor: '#249EBF',
+    //         //Data to be represented on y-axis
+    //         data: inCitations,
+    //       },
+    //       {
+    //         label: 'outCitations',
+    //         // backgroundColor: '#f13030',
+    //         pointBackgroundColor: 'white',
+    //         borderWidth: 1,
+    //         pointBorderColor: '#783FCC',
+    //         data: outCitations,
+    //       }
+    //     ]
+    //   }
+    // } else {
+    //   dataInput = {
+    //     labels: [1,2,3,4,5],
+    //     datasets: [
+    //       {
+    //         label: 'dummy',
+    //         data: [10, 20, 30, 40, 50]
+    //       }
+    //     ]
+    //   }
+    // }
+
+    // return {
+    //   msg: msg,
+    //   data: dataInput,
+    //   noInput: noInput,
+    //   options: [
+    //     {
+    //       value: 'line',
+    //       label: 'Line Chart'
+    //     }, {
+    //       value: 'bar',
+    //       label: 'Bar Chart'
+    //     }
+    //   ],
+    //   type: type
+    // }
     var yearInfo = this.chartData.year;
     var inCitations = this.chartData.inCitations;
     var outCitations = this.chartData.outCitations;
@@ -53,19 +111,20 @@ export default {
       ]
     }
 
-    // var defaultChartData = {
-    //   labels: [1,2,3,4,5],
-    //   datasets: [
-    //     {
-    //       label: 'dummy',
-    //       data: [10, 20, 30, 40, 50]
-    //     }
-    //   ]
-    // }
+    var defaultChartData = {
+      labels: [1,2,3,4,5],
+      datasets: [
+        {
+          label: 'dummy',
+          data: [10, 20, 30, 40, 50]
+        }
+      ]
+    }
 
     return {
       msg: 'Chart View Component',
       data: dataInput,
+      noInput: false,
       options: [
         {
           value: 'line',
