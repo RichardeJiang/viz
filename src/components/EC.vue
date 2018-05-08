@@ -8,23 +8,6 @@
 }
 </style>
 
-<!--script>
-import router from '../router'
-
-export default {
-  name: "EC",
-  created() {
-    this.id = this.$route.params.id;
-    if(this.$route.query.debug) {
-        this.debug = this.$route.query.debug;
-    }
-  },
-  data: function() {
-
-  }
-}
-</script-->
-
 <script>
 export default {
   data: function () {

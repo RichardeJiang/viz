@@ -38,7 +38,7 @@
           <h1>Upload File</h1>
           <div class="dropbox">
             <input type="file" multiple :name="uploadFieldName" :disable="isSaving" @change="filesChange($event.target.name, $event.target.files); fileCount = $event.target.files.length" accept=".csv" class="input-file">
-              <p v-if="isInitial" style="margin-bottom:0px;padding-top:20px">
+              <p v-if="isInitial" style="margin-bottom:0px;padding-top:20px;font-size:15px">
                 Drag your file(s) here to begin<br> or click to browse
               </p>
               <p v-if="isSaving">
@@ -68,6 +68,8 @@
 <script>
 import { upload } from './components/Upload';
 
+import router from './router';
+
 const STATUS_INITIAL = 0, STATUS_SAVING = 1, STATUS_SUCCESS = 2, STATUS_FAILED = 3;
 
 export default {
@@ -78,7 +80,7 @@ export default {
         uploadError: null,
         currentStatus: null,
         uploadFieldName: 'file',
-        testEChartsDataInput: null
+        testChartsDataInput: null
       };
   },
   computed: {
@@ -120,6 +122,15 @@ export default {
           console.log(x);
           // this.uploadedFiles = [].concat(x);
           this.currentStatus = STATUS_SUCCESS;
+          this.testChartsDataInput = x;
+
+          // Note: use router.push to navigate through diff pages programmatically
+          router.push({
+            name: 'Chart',
+            params: {
+              chartData: x
+            }
+          });
         })
         .catch(err => {
           this.uploadError = err.response;

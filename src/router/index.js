@@ -12,7 +12,8 @@ export default new Router({
     {
       path: '/',
       name: 'HelloWorld',
-      component: HelloWorld
+      component: HelloWorld,
+      props: true
     },
     {
     	path: '/add',
@@ -27,7 +28,8 @@ export default new Router({
     {
       path: '/chart',
       name: 'Chart',
-      component: Chart
+      component: Chart,
+      props: true
     }
   ]
 })

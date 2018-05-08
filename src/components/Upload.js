@@ -15,18 +15,10 @@ function upload(formData) {
 	  config: { headers: {'Content-Type': 'multipart/form-data' }}
 	}).then(function (response) {
 		return response.data;
-	    // console.log(response);
 	    // console.log(response.data);
 	}).catch(function (error) {
 	    console.log(error);
 	});
-  //   return axios.post(url, formData)
-  //       .then(function (response) {
-		//     console.log(response);
-		// })
-		// .catch(function (error) {
-		//     console.log(error);
-		// });
 }
 
 export { upload }
