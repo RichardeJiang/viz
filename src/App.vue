@@ -9,8 +9,8 @@
       <router-link to="/">
         <el-button @click="startHacking" type="primary">Star</el-button>
       </router-link>
-      <router-link to="/add">
-        <el-button type="selection">End</el-button>
+      <router-link to="/chart">
+        <el-button type="selection">Chart</el-button>
       </router-link>
       <router-link to="/ec">
         <el-button type="success">EC</el-button>
