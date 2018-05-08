@@ -36,6 +36,7 @@ export default {
         {
           label: 'inCitations',
           // backgroundColor: '#f87979',
+          backgroundColor: 'rgba(47, 152, 208, 0.2)',
           pointBackgroundColor: 'white',
           borderWidth: 1,
           pointBorderColor: '#249EBF',
@@ -45,6 +46,7 @@ export default {
         {
           label: 'outCitations',
           // backgroundColor: '#f13030',
+          backgroundColor: 'rgba(133, 23, 20, 0.2)',
           pointBackgroundColor: 'white',
           borderWidth: 1,
           pointBorderColor: '#783FCC',
