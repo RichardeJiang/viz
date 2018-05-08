@@ -1,14 +1,26 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
+    <div id="header">
+      <el-select v-model="type" placeholder="Select" style="">
+        <el-option
+          v-for="item in options"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+      <h1>{{ msg }}</h1>
+    </div>
     <div>
-      <line-chart :dataInput="data"></line-chart>
+      <line-chart :dataInput="data" v-if="type == 'line'"></line-chart>
+      <bar-chart :dataInput="data" v-if="type == 'bar'"></bar-chart>
     </div>
   </div>
 </template>
 
 <script>
 import LineChart from '@/components/LineChart'
+import BarChart from '@/components/BarChart'
 
 export default {
   name: 'Chart',
@@ -23,7 +35,7 @@ export default {
       datasets: [
         {
           label: 'inCitations',
-          backgroundColor: '#f87979',
+          // backgroundColor: '#f87979',
           pointBackgroundColor: 'white',
           borderWidth: 1,
           pointBorderColor: '#249EBF',
@@ -32,7 +44,7 @@ export default {
         },
         {
           label: 'outCitations',
-          backgroundColor: '#f13030',
+          // backgroundColor: '#f13030',
           pointBackgroundColor: 'white',
           borderWidth: 1,
           pointBorderColor: '#783FCC',
@@ -42,18 +54,35 @@ export default {
     }
 
     return {
-      msg: 'This is the Chart View Component',
-      data: dataInput
+      msg: 'Chart View Component',
+      data: dataInput,
+      options: [
+        {
+          value: 'line',
+          label: 'Line Chart'
+        }, {
+          value: 'bar',
+          label: 'Bar Chart'
+        }
+      ],
+      type: 'line'
     }
   },
   components: {
-    LineChart
+    LineChart,
+    BarChart
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.line {
+  float: left;
+}
+.center-line {
+  float: center;
+}
 h1, h2 {
   font-weight: normal;
 }

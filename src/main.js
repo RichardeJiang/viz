@@ -8,9 +8,11 @@ import 'element-ui/lib/theme-chalk/index.css'
 import ECharts from 'vue-echarts/components/ECharts'
 
 // import ECharts modules manually to reduce bundle size
+// for each plot category (line, bar, etc), it must be imported here manually otherwise cannot be used
 import 'echarts/lib/chart/bar'
 import 'echarts/lib/component/tooltip'
 import 'echarts/lib/component/polar'
+import 'echarts/lib/chart/line'
 
 import App from './App'
 import router from './router'
