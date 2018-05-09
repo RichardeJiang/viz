@@ -9,7 +9,7 @@
       <router-link to="/">
         <el-button @click="startHacking" type="primary">Star</el-button>
       </router-link>
-      <router-link to="/chart">
+      <router-link to="/chart" :chartData="testChartsDataInput">
         <el-button type="selection">Chart</el-button>
       </router-link>
       <router-link to="/ec">

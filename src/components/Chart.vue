@@ -15,8 +15,14 @@
       <!--line-chart :dataInput="data" v-if="type == 'line'"></line-chart>
       <bar-chart :dataInput="data" v-else-if="type == 'bar'"></bar-chart-->
       <bar-chart :dataInput="author"></bar-chart>
-      <hori-bar-chart :dataInput="country"></hori-bar-chart>
-      <hori-bar-chart :dataInput="affiliation"></hori-bar-chart>
+      <p>
+        So it's rather clear that the one with the largest number of submissions this year is: {{topAuthor}}, and all the top {{topAuthorNumber}}, putting together, contribute {{topAuthorContri}} submissions.
+      </p>
+      <hori-bar-chart :dataInput="country" class="chart"></hori-bar-chart>
+      <p>
+        And from the country information (generated from the author data), we can see that the top 1 country, in this case {{firstCountry}}, has made {{topCountryDiff}}% more submission than the second-placed {{secondCountry}}.
+      </p>
+      <hori-bar-chart :dataInput="affiliation" class="chart"></hori-bar-chart>
     </div>
   </div>
 </template>
@@ -92,7 +98,14 @@ export default {
           label: 'Bar Chart'
         }
       ],
-      type: 'bar'
+      type: 'bar',
+      // Possible to consolidate the following info into one object and retrieve using the key
+      topAuthor: topAuthors.labels[0],
+      topAuthorContri: topAuthors.data.reduce(function(a, b) {return a + b;}),
+      topAuthorNumber: topAuthors.labels.length,
+      topCountryDiff: ((topCountries.data[0] - topCountries.data[1]) / topCountries.data[1] * 100).toFixed(2),
+      firstCountry: topCountries.labels[0],
+      secondCountry: topCountries.labels[1],
     }
     
     /* Below: dummy data input */
@@ -148,6 +161,11 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.chart {
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
 .line {
   float: left;
 }
