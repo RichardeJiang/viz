@@ -15,6 +15,8 @@
       <!--line-chart :dataInput="data" v-if="type == 'line'"></line-chart>
       <bar-chart :dataInput="data" v-else-if="type == 'bar'"></bar-chart-->
       <bar-chart :dataInput="author"></bar-chart>
+      <hori-bar-chart :dataInput="country"></hori-bar-chart>
+      <hori-bar-chart :dataInput="affiliation"></hori-bar-chart>
     </div>
   </div>
 </template>
@@ -22,6 +24,7 @@
 <script>
 import LineChart from '@/components/LineChart'
 import BarChart from '@/components/BarChart'
+import HoriBarChart from '@/components/HoriBarChart'
 
 export default {
   name: 'Chart',
@@ -45,6 +48,8 @@ export default {
       ]
     }
 
+    // topAuthorData.datasets[0].borderWidth = 5;
+
     var topCountryData = {
       labels: topCountries.labels,
       datasets: [
@@ -63,7 +68,7 @@ export default {
       labels: topAffiliations.labels,
       datasets: [
         {
-          label: 'Top Authors',
+          label: 'Top Affiliations',
           backgroundColor: 'rgba(47, 152, 208, 0.2)',
           pointBackgroundColor: 'white',
           borderWidth: 1,
@@ -136,6 +141,7 @@ export default {
   components: {
     LineChart,
     BarChart,
+    HoriBarChart
   }
 }
 </script>
