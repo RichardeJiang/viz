@@ -9,36 +9,20 @@
       <router-link to="/">
         <el-button @click="startHacking" type="primary">Star</el-button>
       </router-link>
-      <router-link to="/chart" :chartData="testChartsDataInput">
+      <!--router-link to="/chart" :chartData="testChartsDataInput">
         <el-button type="selection">Chart</el-button>
-      </router-link>
+      </router-link-->
       <router-link to="/ec">
         <el-button type="success">EC</el-button>
       </router-link>
-      <!--Original Element Style Upload Component-->
-      <!--div style="line-height:20px;margin-left:10px; margin-bottom: 10px" align="left">
-        <el-upload
-          class="upload-demo"
-          action="https://jsonplaceholder.typicode.com/posts/"
-          :on-preview="handlePreview"
-          :on-remove="handleRemove"
-          :before-remove="beforeRemove"
-          :on-success="handleSuccess"
-          multiple
-          :limit="3"
-          :on-exceed="handleExceed"
-          :file-list="fileList">
-          <el-button size="small" type="primary">Click to upload</el-button>
-          <div slot="tip" class="el-upload__tip" style="margin-left:5px">jpg/png files with a size less than 500kb</div>
-        </el-upload>
-      </div-->
+
       <center id="upload">
-        <form enctype="multipart/form-data" novalidate v-if="isInitial || isSaving">
+        <form enctype="multipart/form-data" novalidate v-if="isInitial || isSaving || isSuccess">
           <!--The type multipart/form-data is important, otherwise Django will not accept-->
           <h1>Upload File</h1>
           <div class="dropbox">
             <input type="file" multiple :name="uploadFieldName" :disable="isSaving" @change="filesChange($event.target.name, $event.target.files); fileCount = $event.target.files.length" accept=".csv" class="input-file">
-              <p v-if="isInitial" style="margin-bottom:0px;padding-top:20px;font-size:15px">
+              <p v-if="isInitial || isSuccess" style="margin-bottom:0px;padding-top:20px;font-size:15px">
                 Drag your file(s) here to begin<br> or click to browse
               </p>
               <p v-if="isSaving">
@@ -49,10 +33,11 @@
       </center>
     </el-aside>
     <el-container>
-      <el-header>Header</el-header>
+      <el-header><b>Data Visualization</b></el-header>
       <el-main>
         <center>
-          <router-view/>
+          <!--router-view :key="$route.name + ($route.params || '')"></router-view-->
+          <router-view></router-view>
         </center>
       </el-main>
     </el-container>
@@ -124,11 +109,15 @@ export default {
           this.currentStatus = STATUS_SUCCESS;
           this.testChartsDataInput = x;
 
+          var infoType = x.infoType;
+          var infoData = x.infoData;
+
           // Note: use router.push to navigate through diff pages programmatically
           router.push({
             name: 'Chart',
             params: {
-              chartData: x
+              chartData: infoData,
+              infoType: infoType
             }
           });
         })
@@ -153,28 +142,6 @@ export default {
       // save it
       this.save(formData);
     }
-    // handleRemove(file, fileList) {
-    //   console.log(file, fileList);
-    // },
-    // handlePreview(file) {
-    //   console.log(file);
-    // },
-    // handleSuccess(response, file, fileList) {
-    //   console.log(file);
-    //   var fileName = file[0].name;
-    //   this.$notify({
-    //     title: 'OK!',
-    //     type: 'success',
-    //     message: 'The file ' + fileName,
-    //     duration: 2000
-    //   })
-    // },
-    // handleExceed(files, fileList) {
-    //   this.$message.warning(`The limit is 3, you selected ${files.length} files this time, add up to ${files.length + fileList.length} totally`);
-    // },
-    // beforeRemove(file, fileList) {
-    //   return this.$confirm(`Sure to remove ${ file.name }？`);
-    // }
   },
   mounted() {
     this.reset();
@@ -225,7 +192,7 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 30px;
 }
 
 #main {
@@ -252,7 +219,7 @@ export default {
 .el-main {
   background-color: #E9EEF3;
   color: #333;
-  height: 500px;
+  height: 800px;
   /*text-align: center;*/
   /*line-height: 450px;*/
 }
