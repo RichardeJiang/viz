@@ -1,6 +1,6 @@
 <template>
   <div class="hello">
-    <div id="header">
+    <div id="header" v-if="infoType === 'dummy'">
       <el-select v-model="type" placeholder="Select" style="">
         <el-option
           v-for="item in options"
@@ -9,8 +9,8 @@
           :value="item.value">
         </el-option>
       </el-select>
-      <h1>{{ msg }}</h1>
     </div>
+    <h1>{{ msg }}</h1>
     <div v-if="infoType === 'author'">
       <!--line-chart :dataInput="data" v-if="type == 'line'"></line-chart>
       <bar-chart :dataInput="data" v-else-if="type == 'bar'"></bar-chart-->
@@ -38,7 +38,7 @@
         The mean scores and mean confidence values can be found as follows:
         <el-table
           :data="tableData"
-          style="width: 100%">
+          style="width: 80%">
           <el-table-column
             prop="field"
             label="Field"
