@@ -52,7 +52,11 @@
         </el-table>
       </p>
     </div>
-    <div v-else> <!--Unknown file, so http returned the dummy data-->
+    <div v-else-if="infoType === 'submission'">
+    </div>
+    <div v-else-if="infoType === 'review'">
+    </div>
+    <div v-else-if="infoType === 'dummy'"> <!--Unknown file, so http returned the dummy data-->
       <line-chart :dataInput="data" v-if="type == 'line'"></line-chart>
       <bar-chart :dataInput="data" v-else-if="type == 'bar'"></bar-chart>
     </div>
@@ -67,23 +71,6 @@ import HoriBarChart from '@/components/HoriBarChart'
 export default {
   name: 'Chart',
   props: ['chartData', 'infoType'],
-  computed: {
-    dummy() {
-      return {
-        labels: this.chartData.topAuthors.labels,
-        datasets: [
-          {
-            label: 'Top Authors',
-            backgroundColor: 'rgba(47, 152, 208, 0.2)',
-            pointBackgroundColor: 'white',
-            borderWidth: 1,
-            pointBorderColor: '#249EBF',
-            data: this.chartData.topAuthors.data,
-          }
-        ]
-      }
-    }
-  },
   data: function () {
     if (this.infoType == 'author') { // author.csv input
       var topAuthors = this.chartData.topAuthors;
@@ -233,17 +220,10 @@ export default {
     HoriBarChart
   },
   beforeRouteUpdate(to, from, next) {
-    // this.chartData = to.params.chartData;
-    // this.infoType = to.params.infoType;
     console.log("inside haha");
 
     next();
   },
-  // watch: {
-  //   '$route.params.chartData': function(newData) {
-  //     console.log("does it");
-  //   }
-  // }
 }
 </script>
 
