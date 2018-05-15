@@ -4,6 +4,7 @@ import HelloWorld from '@/components/HelloWorld'
 import HelloAgain from '@/components/HelloAgain'
 import EC from '@/components/EC'
 import Chart from '@/components/Chart'
+import Result from '@/components/Result'
 
 Vue.use(Router)
 
@@ -29,6 +30,12 @@ export default new Router({
       path: '/chart',
       name: 'Chart',
       component: Chart,
+      props: true
+    },
+    {
+      path: '/result/:infoType',
+      name: 'Result',
+      component: Result,
       props: true
     }
   ]

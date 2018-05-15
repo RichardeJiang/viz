@@ -37,7 +37,7 @@
       <el-main>
         <center>
           <!--router-view :key="$route.name + ($route.params || '')"></router-view-->
-          <router-view></router-view>
+          <router-view :key="$route.fullPath"></router-view>
         </center>
       </el-main>
     </el-container>
@@ -65,7 +65,19 @@ export default {
         uploadError: null,
         currentStatus: null,
         uploadFieldName: 'file',
-        testChartsDataInput: null
+        testChartsDataInput: null,
+        options: [
+          {
+            value: 'author',
+            label: 'Author File'
+          }, {
+            value: 'submission',
+            label: 'Submission File'
+          }, {
+            value: 'review',
+            label: 'Review File'
+          }
+        ],
       };
   },
   computed: {
@@ -114,12 +126,21 @@ export default {
 
           // Note: use router.push to navigate through diff pages programmatically
           router.push({
-            name: 'Chart',
+            name: 'Result',
             params: {
               chartData: infoData,
               infoType: infoType
             }
           });
+
+          // router.push({ path: `/result/${infoType}/data/${infoData}` })
+          // router.push({ 
+          //   path: '/result/' + infoType,
+          //   // params: {
+          //   //   chartData: infoData,
+          //   //   infoType: infoType
+          //   // } 
+          // });
         })
         .catch(err => {
           this.uploadError = err.response;
