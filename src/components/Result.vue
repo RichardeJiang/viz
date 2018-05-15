@@ -236,16 +236,14 @@ export default {
     // this.chartData = to.params.chartData;
     // this.infoType = to.params.infoType;
     console.log("inside haha");
-    
+
     next();
   },
-  watch: {
-    '$route.params.chartData': function(newData) {
-      console.log("does it");
-      // this.$forceUpdate();
-      // this.data;
-    }
-  }
+  // watch: {
+  //   '$route.params.chartData': function(newData) {
+  //     console.log("does it");
+  //   }
+  // }
 }
 </script>
 

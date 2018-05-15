@@ -14,6 +14,11 @@
             yAxes: [{
               ticks: {
                 beginAtZero: true,
+                callback: function(value, index, values) {
+                    if (Math.floor(value) === value) {
+                        return value;
+                    }
+                }
                 // stepSize: 1
               },
               gridLines: {

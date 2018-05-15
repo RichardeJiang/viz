@@ -18,7 +18,12 @@
             }],
             xAxes: [{
               ticks: {
-                beginAtZero: true
+                beginAtZero: true,
+                callback: function(value, index, values) {
+                    if (Math.floor(value) === value) {
+                        return value;
+                    }
+                }
               },
               gridLines: {
                 display: true
