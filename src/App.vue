@@ -132,15 +132,6 @@ export default {
               infoType: infoType
             }
           });
-
-          // router.push({ path: `/result/${infoType}/data/${infoData}` })
-          // router.push({ 
-          //   path: '/result/' + infoType,
-          //   // params: {
-          //   //   chartData: infoData,
-          //   //   infoType: infoType
-          //   // } 
-          // });
         })
         .catch(err => {
           this.uploadError = err.response;

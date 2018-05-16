@@ -20,7 +20,6 @@
             v-on:click="toggleEdit(this, text)"
             title="Click to edit!">{{text.val}}</span>
       <input type="text"
-             v-el="input"
              v-model="text.val"
              v-show="text.edit"
              v-on:blur="saveEdit(ev, text)"/>
@@ -28,37 +27,11 @@
         So it's rather clear that the one with the largest number of submissions this year is: {{topAuthor}}, and all the top {{topAuthorNumber}}, putting together, contribute {{topAuthorContri}} submissions.
       </p>
       <hori-bar-chart :dataInput="country" class="chart"></hori-bar-chart>
+      <editable-text v-bind:text.sync="text"></editable-text>
       <p>
         And from the country information (generated from the author data), we can see that the top 1 country, in this case {{firstCountry}}, has made {{topCountryDiff}}% more submission than the second-placed {{secondCountry}}.
       </p>
       <hori-bar-chart :dataInput="affiliation" class="chart"></hori-bar-chart>
-    </div>
-    <div v-else-if="infoType === 'reviewScore'">
-      <p>
-        There have been many things going on in our review process in JCDL 2018, and we list a few here:
-      </p>
-      <br>
-      <p>
-        Firstly, it's interesting to know that out of {{totalreview}} reviews, only {{yesPercentage}}% have been nominated for best paper awards. There has hence been a 3.5% decrease from last year's data.
-      </p>
-      <br>
-      <p>
-        The mean scores and mean confidence values can be found as follows:
-        <el-table
-          :data="tableData"
-          style="width: 80%">
-          <el-table-column
-            prop="field"
-            label="Field"
-            width="180">
-          </el-table-column>
-          <el-table-column
-            prop="value"
-            label="Value"
-            width="180">
-          </el-table-column>
-        </el-table>
-      </p>
     </div>
     <div v-else-if="infoType === 'submission'">
     </div>
@@ -75,6 +48,7 @@
 import LineChart from '@/components/LineChart'
 import BarChart from '@/components/BarChart'
 import HoriBarChart from '@/components/HoriBarChart'
+import EditableText from '@/components/EditableText'
 
 export default {
   name: 'Chart',
@@ -244,6 +218,7 @@ export default {
     LineChart,
     BarChart,
     HoriBarChart,
+    EditableText
   },
   beforeRouteUpdate(to, from, next) {
     console.log("inside haha");
