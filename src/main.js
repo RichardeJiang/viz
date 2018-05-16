@@ -3,7 +3,6 @@
 import Vue from 'vue'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
-// import IEcharts from 'vue-echarts-v3/src/full.js';
 
 import ECharts from 'vue-echarts/components/ECharts'
 

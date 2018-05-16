@@ -36,15 +36,11 @@
       <el-header><b>Data Visualization</b></el-header>
       <el-main>
         <center>
-          <!--router-view :key="$route.name + ($route.params || '')"></router-view-->
           <router-view :key="$route.fullPath"></router-view>
         </center>
       </el-main>
     </el-container>
   </el-container>
-  <div>
-    <!--router-link :to="{ name: 'HelloWorld' }"-->
-  </div>
 </div>
 </center>
 

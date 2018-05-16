@@ -12,26 +12,43 @@
     </div>
     <h1>{{ msg }}</h1>
     <div v-if="infoType === 'author'">
-      <!--line-chart :dataInput="data" v-if="type == 'line'"></line-chart>
-      <bar-chart :dataInput="data" v-else-if="type == 'bar'"></bar-chart-->
-      <bar-chart :dataInput="author" class="chart"></bar-chart>
-      <!--editable :content="text" @update="text = $event"></editable-->
-      <span v-show="!text.edit"
-            v-on:click="toggleEdit(this, text)"
-            title="Click to edit!">{{text.val}}</span>
-      <input type="text"
-             v-model="text.val"
-             v-show="text.edit"
-             v-on:blur="saveEdit(ev, text)"/>
-      <p>
-        So it's rather clear that the one with the largest number of submissions this year is: {{topAuthor}}, and all the top {{topAuthorNumber}}, putting together, contribute {{topAuthorContri}} submissions.
-      </p>
-      <hori-bar-chart :dataInput="country" class="chart"></hori-bar-chart>
-      <editable-text v-bind:text.sync="text"></editable-text>
-      <p>
-        And from the country information (generated from the author data), we can see that the top 1 country, in this case {{firstCountry}}, has made {{topCountryDiff}}% more submission than the second-placed {{secondCountry}}.
-      </p>
-      <hori-bar-chart :dataInput="affiliation" class="chart"></hori-bar-chart>
+      <bar-chart :dataInput="author" :titleText="'Top Authors'" class="chart"></bar-chart>
+      <editable-text v-bind:text.sync="authorText"></editable-text>
+      <!--el-select v-model="type" placeholder="Select Chart" style="margin-top: 20px">
+        <el-option
+          v-for="item in options"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+      <hori-bar-chart :dataInput="country" :titleText="'Top Countries'" class="chart" v-if="type=='bar'"></hori-bar-chart>
+      <pie-chart :dataInput="country" :titleText="'Top Countries'" class="chart" v-else-if="type=='pie'"></pie-chart>
+      <editable-text v-bind:text.sync="countryText"></editable-text>
+      <el-select v-model="type" placeholder="Select Chart" style="margin-top: 20px">
+        <el-option
+          v-for="item in options"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+      <hori-bar-chart :dataInput="affiliation" :titleText="'Top Affiliations'" class="chart"></hori-bar-chart>
+      <editable-text v-bind:text.sync="remarks"></editable-text-->
+
+      <div v-for="dataEntry in dataEntries">
+        <el-select v-model="dataEntry.type" placeholder="Select Chart" style="margin-top: 20px">
+          <el-option
+            v-for="item in dataEntry.options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <hori-bar-chart :dataInput="dataEntry.data" :titleText="'Top Countries'" class="chart" v-if="dataEntry.type=='bar'"></hori-bar-chart>
+        <pie-chart :dataInput="dataEntry.data" :titleText="'Top Countries'" class="chart" v-else-if="dataEntry.type=='pie'"></pie-chart>
+        <editable-text v-bind:text.sync="dataEntry.text"></editable-text>
+      </div>
     </div>
     <div v-else-if="infoType === 'submission'">
     </div>
@@ -48,7 +65,11 @@
 import LineChart from '@/components/LineChart'
 import BarChart from '@/components/BarChart'
 import HoriBarChart from '@/components/HoriBarChart'
+import PieChart from '@/components/PieChart'
+
 import EditableText from '@/components/EditableText'
+
+import Const from './const'
 
 export default {
   name: 'Chart',
@@ -63,7 +84,7 @@ export default {
         labels: topAuthors.labels,
         datasets: [
           {
-            label: 'Top Authors',
+            label: 'Submission Counts',
             backgroundColor: 'rgba(47, 152, 208, 0.2)',
             pointBackgroundColor: 'white',
             borderWidth: 1,
@@ -73,26 +94,31 @@ export default {
         ]
       }
 
+      var authorInitialText = "So it's rather clear that the one with the largest number of submissions this year is: " + topAuthors.labels[0] + ", and all the top " + String(topAuthors.labels.length) + ", putting together, contribute " + String(topAuthors.data.reduce(function(a, b) {return a + b;})) + " submissions in total.";
+
       var topCountryData = {
         labels: topCountries.labels,
         datasets: [
           {
-            label: 'Top Countries',
-            backgroundColor: 'rgba(47, 152, 208, 0.2)',
+            label: 'Submission Counts',
+            backgroundColor: Const.colorScheme,
+            // backgroundColor: ['rgba(231, 76, 60, 0.4)', 'rgba(211, 84, 0, 0.4)', 'rgba(241, 196, 15, 0.4)', 'rgba(26, 188, 156, 0.4)', 'rgba(52, 152, 219, 0.4)', ],
             pointBackgroundColor: 'white',
             borderWidth: 1,
-            pointBorderColor: '#249EBF',
+            // pointBorderColor: '#249EBF',
             data: topCountries.data,
           }
         ]
       }
 
+      var countryInitialText = "And from the country information (generated from the author data), we can see that the top 1 country, in this case " + topCountries.labels[0] + ", has made " + String(((topCountries.data[0] - topCountries.data[1]) / topCountries.data[1] * 100).toFixed(2)) + "% more submission than the second-placed " + topCountries.labels[1] + ".";
+
       var topAffiliationData = {
         labels: topAffiliations.labels,
         datasets: [
           {
-            label: 'Top Affiliations',
-            backgroundColor: 'rgba(47, 152, 208, 0.2)',
+            label: 'Submission Counts',
+            backgroundColor: Const.colorScheme,
             pointBackgroundColor: 'white',
             borderWidth: 1,
             pointBorderColor: '#249EBF',
@@ -108,25 +134,66 @@ export default {
           edit: false
         },
         author: topAuthorData,
-        country: topCountryData,
-        affiliation: topAffiliationData,
-        options: [
+        dataEntries: [
           {
-            value: 'line',
-            label: 'Line Chart'
-          }, {
-            value: 'bar',
-            label: 'Bar Chart'
+            data: topCountryData,
+            text: {
+              val: countryInitialText,
+              edit: false
+            },
+            options: [
+              {
+                value: 'pie',
+                label: 'Pie Chart'
+              }, {
+                value: 'bar',
+                label: 'Bar Chart'
+              }
+            ],
+            type: 'bar'
+          },
+          {
+            data: topAffiliationData,
+            text: {
+              val: 'You may add in any additional remarks here.',
+              edit: false
+            },
+            options: [
+              {
+                value: 'pie',
+                label: 'Pie Chart'
+              }, {
+                value: 'bar',
+                label: 'Bar Chart'
+              }
+            ],
+            type: 'pie'
           }
         ],
-        type: 'bar',
-        // Possible to consolidate the following info into one object and retrieve using the key
-        topAuthor: topAuthors.labels[0],
-        topAuthorContri: topAuthors.data.reduce(function(a, b) {return a + b;}),
-        topAuthorNumber: topAuthors.labels.length,
-        topCountryDiff: ((topCountries.data[0] - topCountries.data[1]) / topCountries.data[1] * 100).toFixed(2),
-        firstCountry: topCountries.labels[0],
-        secondCountry: topCountries.labels[1],
+        // country: topCountryData,
+        // affiliation: topAffiliationData,
+        authorText: {
+          val: authorInitialText,
+          edit: false
+        },
+        // countryText: {
+        //   val: countryInitialText,
+        //   edit: false
+        // },
+        // remarks: {
+        //   val: 'You may add in any additional remarks here.',
+        //   edit: false
+        // },
+        // options: [
+        //   {
+        //     value: 'pie',
+        //     label: 'Pie Chart'
+        //   }, {
+        //     value: 'bar',
+        //     label: 'Bar Chart'
+        //   }
+        // ],
+        // type: 'bar'
       }
     } else if (this.infoType == 'reviewScore') {
       return {
@@ -201,23 +268,12 @@ export default {
 
   },
   methods: {
-    toggleEdit: function(ev, text){
-      text.edit = !text.edit;
-      if (text.edit) {
-        Vue.nextTick(function() {
-          ev.$$.input.focus();
-        })   
-      }
-    },
-    saveEdit: function(ev, text){
-      //save your changes
-        this.toggleEdit(ev, text);
-    }
   },
   components: {
     LineChart,
     BarChart,
     HoriBarChart,
+    PieChart,
     EditableText
   },
   beforeRouteUpdate(to, from, next) {

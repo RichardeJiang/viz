@@ -5,11 +5,16 @@
 
   export default {
     extends: HorizontalBar,
-    props: ['dataInput'],
+    props: ['dataInput', 'titleText'],
     data () {
       return {
         //Chart.js options that controls the appearance of the chart
         options: {
+          title: {
+            display: true,
+            text: this.titleText,
+            fontSize: 14
+          },
           scales: {
             yAxes: [{
               gridLines: {

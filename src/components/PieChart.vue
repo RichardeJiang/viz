@@ -1,10 +1,10 @@
 <script>
   //Importing Line class from the vue-chartjs wrapper
-  import {Line} from 'vue-chartjs'
+  import {Pie} from 'vue-chartjs'
   //Exporting this so it can be used in other components
 
   export default {
-    extends: Line,
+    extends: Pie,
     props: ['dataInput', 'titleText'],
     data () {
       return {
@@ -12,24 +12,7 @@
         options: {
           title: {
             display: true,
-            text: this.titleText,
-            fontSize: 14
-          },
-          scales: {
-            yAxes: [{
-              ticks: {
-                beginAtZero: true,
-                // stepSize: 1
-              },
-              gridLines: {
-                display: true
-              }
-            }],
-            xAxes: [ {
-              gridLines: {
-                display: false
-              }
-            }]
+            text: this.titleText
           },
           legend: {
             display: true
