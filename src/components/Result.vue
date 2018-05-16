@@ -15,6 +15,15 @@
       <!--line-chart :dataInput="data" v-if="type == 'line'"></line-chart>
       <bar-chart :dataInput="data" v-else-if="type == 'bar'"></bar-chart-->
       <bar-chart :dataInput="author" class="chart"></bar-chart>
+      <!--editable :content="text" @update="text = $event"></editable-->
+      <span v-show="!text.edit"
+            v-on:click="toggleEdit(this, text)"
+            title="Click to edit!">{{text.val}}</span>
+      <input type="text"
+             v-el="input"
+             v-model="text.val"
+             v-show="text.edit"
+             v-on:blur="saveEdit(ev, text)"/>
       <p>
         So it's rather clear that the one with the largest number of submissions this year is: {{topAuthor}}, and all the top {{topAuthorNumber}}, putting together, contribute {{topAuthorContri}} submissions.
       </p>
@@ -23,7 +32,6 @@
         And from the country information (generated from the author data), we can see that the top 1 country, in this case {{firstCountry}}, has made {{topCountryDiff}}% more submission than the second-placed {{secondCountry}}.
       </p>
       <hori-bar-chart :dataInput="affiliation" class="chart"></hori-bar-chart>
-      <hori-bar-chart :dataInput="dummy" class="chart"></hori-bar-chart>
     </div>
     <div v-else-if="infoType === 'reviewScore'">
       <p>
@@ -121,6 +129,10 @@ export default {
 
       return {
         msg: 'Chart View Component',
+        text: {
+          val: 'This is update of input!!',
+          edit: false
+        },
         author: topAuthorData,
         country: topCountryData,
         affiliation: topAffiliationData,
@@ -214,10 +226,24 @@ export default {
     }
 
   },
+  methods: {
+    toggleEdit: function(ev, text){
+      text.edit = !text.edit;
+      if (text.edit) {
+        Vue.nextTick(function() {
+          ev.$$.input.focus();
+        })   
+      }
+    },
+    saveEdit: function(ev, text){
+      //save your changes
+        this.toggleEdit(ev, text);
+    }
+  },
   components: {
     LineChart,
     BarChart,
-    HoriBarChart
+    HoriBarChart,
   },
   beforeRouteUpdate(to, from, next) {
     console.log("inside haha");
