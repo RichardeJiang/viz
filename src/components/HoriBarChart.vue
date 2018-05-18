@@ -6,6 +6,11 @@
   export default {
     extends: HorizontalBar,
     props: ['dataInput', 'titleText'],
+    computed: {
+      chartData: function() {
+        return this.dataInput;
+      }
+    },
     data () {
       return {
         //Chart.js options that controls the appearance of the chart
@@ -44,12 +49,21 @@
       }
     },
     mounted () {
-      this.renderChart(this.dataInput, this.options)
+      // this.renderChart(this.dataInput, this.options);
+      this.render();
+    },
+    methods: {
+      render: function() {
+        this.renderChart(this.chartData, this.options);
+      }
     },
     watch: { 
       dataInput: function() {
         console.log("Got it in the bar chart!");
-        this.renderChart(this.dataInput, this.options); 
+        this.$data._chart.destroy();
+        this.render();
+        // this.renderChart(this.dataInput, this.options); 
+        // this._chart.update();
       } 
     }
   }
