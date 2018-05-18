@@ -3,7 +3,7 @@
     <h1>{{ msg }}</h1>
     <div v-if="infoType === 'author'"> <!--Start of Author Component-->
 
-      <bar-chart :data-input="topAuthorData" :title-text="'Top Authors'" class="chart"></bar-chart>
+      <bar-chart :data-input="topAuthorData" :title-text="'Top Authors'" class="chart" id="testpdf" ref="testpdf"></bar-chart>
       <editable-text v-bind:text.sync="authorText"></editable-text>
 
       <el-select v-model="countryChartType" placeholder="Select Chart" style="margin-top: 20px;margin-right: 10px">
@@ -46,6 +46,8 @@
       <pie-chart :data-input="topAffiliationData" :title-text="'Top Affiliations'" class="chart" v-else-if="affiliationChartType=='pie'"></pie-chart>
       <editable-text v-bind:text.sync="affiliationText"></editable-text>
 
+      <el-button @click="saveToPdf" type="success" plain style="margin-top: 10px">Save</el-button>
+
     </div> <!--End of Author Component-->
 
 
@@ -67,7 +69,7 @@
         </el-option>
       </el-select>
       <vue-word-cloud :words="wordCloudByTrack[wordCloudSelectedTrack]" :animationDuration="100" font-family="Roboto" style="width: 70%;height: 200px"></vue-word-cloud>
-      <el-button @click="saveToPdf" type="success">Save</el-button>
+      <el-button @click="saveToPdf" type="success" plain style="margin-top: 40px">Save</el-button>
 
     </div> <!--End of Submission Component-->
 
@@ -98,6 +100,7 @@ import Const from './const'
 
 import VueWordCloud from 'vuewordcloud'
 import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 
 export default {
   name: 'Chart',
@@ -105,7 +108,7 @@ export default {
   data: function () {
     if (this.infoType == 'author') { // author.csv input
 
-      var authorInitialText = "So it's rather clear that the one with the largest number of submissions this year is: " + this.chartData.topAuthors.labels[0] + ", and all the top " + String(this.authorDataLength) + ", putting together, contribute " + String(this.chartData.topAuthors.data.slice(0, this.authorDataLength).reduce(function(a, b) {return a + b;})) + " submissions in total.";
+      var authorInitialText = "So it's rather clear that the one with the largest number of submissions this year is: " + this.chartData.topAuthors.labels[0] + ", and all the top " + String(3) + ", putting together, contribute " + String(this.chartData.topAuthors.data.slice(0, 3).reduce(function(a, b) {return a + b;})) + " submissions in total.";
 
       var countryInitialText = "And from the country information (generated from the author data), we can see that the top 1 country, in this case " + this.chartData.topCountries.labels[0] + ", has made " + String(((this.chartData.topCountries.data[0] - this.chartData.topCountries.data[1]) / this.chartData.topCountries.data[1] * 100).toFixed(2)) + "% more submission than the second-placed " + this.chartData.topCountries.labels[1] + ".";
 
@@ -261,9 +264,32 @@ export default {
   methods: {
     saveToPdf: function() {
       let fileName = 'Visual Analysis';
-      var doc = new jsPDF();
-      doc.text("Hello World", 10, 10);
-      doc.save(fileName + ".pdf");
+      var leftMargin = 15;
+      var rightMargin = 15;
+      var pdfInMM = 210;
+      var doc = new jsPDF("p", "mm", "a4");
+      // doc.text("Hello World", 10, 10);
+      var lines = doc.splitTextToSize(this.authorText.val, (pdfInMM - leftMargin - rightMargin));
+      doc.text(leftMargin, 20, lines);
+      html2canvas(document.getElementById('testpdf')).then(canvas => {
+        var imageData = canvas.toDataURL("image/png");
+        doc.addImage(imageData, 'PNG', 15, 50, canvas.width / 8, canvas.height / 8);
+
+        doc.save(fileName + '.pdf');
+      });
+      // html2canvas(dom, {
+      //   onrendered: function(canvas) {
+      //     var image = new Image();
+      //     image.src = canvas.toDataURL();
+      //     document.getElementById()
+      //   }
+      // });
+      // html2canvas(document.querySelector('testpdf')).then(canvas => {
+      //   var imageData = canvas.toDataURL("image/png");
+      //   doc.addImage(imageData, 'PNG');
+      //   doc.save(fileName + '.pdf');
+      // });
+      // doc.save(fileName + ".pdf");
     },
     chooseColorScheme: function(len) {
       switch (len) {
