@@ -24,6 +24,12 @@
     },
     mounted () {
       this.renderChart(this.dataInput, this.options)
+    },
+    watch: { 
+      dataInput: function() {
+        console.log("Got it in the bar chart!");
+        this.renderChart(this.dataInput, this.options); 
+      } 
     }
   }
 </script>

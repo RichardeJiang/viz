@@ -12,43 +12,51 @@
     </div>
     <h1>{{ msg }}</h1>
     <div v-if="infoType === 'author'">
-      <bar-chart :dataInput="author" :titleText="'Top Authors'" class="chart"></bar-chart>
-      <editable-text v-bind:text.sync="authorText"></editable-text>
-      <!--el-select v-model="type" placeholder="Select Chart" style="margin-top: 20px">
-        <el-option
-          v-for="item in options"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value">
-        </el-option>
-      </el-select>
-      <hori-bar-chart :dataInput="country" :titleText="'Top Countries'" class="chart" v-if="type=='bar'"></hori-bar-chart>
-      <pie-chart :dataInput="country" :titleText="'Top Countries'" class="chart" v-else-if="type=='pie'"></pie-chart>
-      <editable-text v-bind:text.sync="countryText"></editable-text>
-      <el-select v-model="type" placeholder="Select Chart" style="margin-top: 20px">
-        <el-option
-          v-for="item in options"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value">
-        </el-option>
-      </el-select>
-      <hori-bar-chart :dataInput="affiliation" :titleText="'Top Affiliations'" class="chart"></hori-bar-chart>
-      <editable-text v-bind:text.sync="remarks"></editable-text-->
 
-      <div v-for="dataEntry in dataEntries">
-        <el-select v-model="dataEntry.type" placeholder="Select Chart" style="margin-top: 20px">
-          <el-option
-            v-for="item in dataEntry.options"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select>
-        <hori-bar-chart :dataInput="dataEntry.data" :titleText="'Top Countries'" class="chart" v-if="dataEntry.type=='bar'"></hori-bar-chart>
-        <pie-chart :dataInput="dataEntry.data" :titleText="'Top Countries'" class="chart" v-else-if="dataEntry.type=='pie'"></pie-chart>
-        <editable-text v-bind:text.sync="dataEntry.text"></editable-text>
-      </div>
+      <bar-chart :data-input="topAuthorData" :title-text="'Top Authors'" class="chart"></bar-chart>
+      <editable-text v-bind:text.sync="authorText"></editable-text>
+
+      <el-select v-model="countryChartType" placeholder="Select Chart" style="margin-top: 20px;margin-right: 10px">
+        <el-option
+          v-for="item in chartOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+      <el-select v-model="countryDataLength" placeholder="Select Length" style="margin-top: 20px;margin-right: 10px">
+        <el-option
+          v-for="item in dataLengthOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+      <!--hori-bar-chart :dataInput="computeCountryData()" :titleText="'Top Countries'" class="chart" v-if="countryChartType=='bar'"></hori-bar-chart-->
+      <hori-bar-chart v-bind:data-input="topCountryData" :title-text="'Top Countries'" class="chart" v-if="countryChartType=='bar'"></hori-bar-chart>
+      <pie-chart v-bind:data-input="topCountryData" :title-text="'Top Countries'" class="chart" v-else-if="countryChartType=='pie'"></pie-chart>
+      <editable-text v-bind:text.sync="countryText"></editable-text>
+
+      <el-select v-model="affiliationChartType" placeholder="Select Chart" style="margin-top: 20px; margin-right: 10px">
+        <el-option
+          v-for="item in chartOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+      <el-select v-model="affiliationDataLength" placeholder="Select Length" style="margin-top: 20px;margin-right: 10px">
+        <el-option
+          v-for="item in dataLengthOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+      <hori-bar-chart :data-input="topAffiliationData" :title-text="'Top Affiliations'" class="chart" v-if="affiliationChartType=='bar'"></hori-bar-chart>
+      <pie-chart :data-input="topAffiliationData" :title-text="'Top Affiliations'" class="chart" v-else-if="affiliationChartType=='pie'"></pie-chart>
+      <editable-text v-bind:text.sync="affiliationText"></editable-text>
+
     </div>
     <div v-else-if="infoType === 'submission'">
     </div>
@@ -76,124 +84,60 @@ export default {
   props: ['chartData', 'infoType'],
   data: function () {
     if (this.infoType == 'author') { // author.csv input
-      var topAuthors = this.chartData.topAuthors;
-      var topCountries = this.chartData.topCountries;
-      var topAffiliations = this.chartData.topAffiliations;
 
-      var topAuthorData = {
-        labels: topAuthors.labels,
-        datasets: [
-          {
-            label: 'Submission Counts',
-            backgroundColor: 'rgba(47, 152, 208, 0.2)',
-            pointBackgroundColor: 'white',
-            borderWidth: 1,
-            pointBorderColor: '#249EBF',
-            data: topAuthors.data,
-          }
-        ]
-      }
+      var authorInitialText = "So it's rather clear that the one with the largest number of submissions this year is: " + this.chartData.topAuthors.labels[0] + ", and all the top " + String(this.authorDataLength) + ", putting together, contribute " + String(this.chartData.topAuthors.data.slice(0, this.authorDataLength).reduce(function(a, b) {return a + b;})) + " submissions in total.";
 
-      var authorInitialText = "So it's rather clear that the one with the largest number of submissions this year is: " + topAuthors.labels[0] + ", and all the top " + String(topAuthors.labels.length) + ", putting together, contribute " + String(topAuthors.data.reduce(function(a, b) {return a + b;})) + " submissions in total.";
-
-      var topCountryData = {
-        labels: topCountries.labels,
-        datasets: [
-          {
-            label: 'Submission Counts',
-            backgroundColor: Const.colorScheme,
-            // backgroundColor: ['rgba(231, 76, 60, 0.4)', 'rgba(211, 84, 0, 0.4)', 'rgba(241, 196, 15, 0.4)', 'rgba(26, 188, 156, 0.4)', 'rgba(52, 152, 219, 0.4)', ],
-            pointBackgroundColor: 'white',
-            borderWidth: 1,
-            // pointBorderColor: '#249EBF',
-            data: topCountries.data,
-          }
-        ]
-      }
-
-      var countryInitialText = "And from the country information (generated from the author data), we can see that the top 1 country, in this case " + topCountries.labels[0] + ", has made " + String(((topCountries.data[0] - topCountries.data[1]) / topCountries.data[1] * 100).toFixed(2)) + "% more submission than the second-placed " + topCountries.labels[1] + ".";
-
-      var topAffiliationData = {
-        labels: topAffiliations.labels,
-        datasets: [
-          {
-            label: 'Submission Counts',
-            backgroundColor: Const.colorScheme,
-            pointBackgroundColor: 'white',
-            borderWidth: 1,
-            pointBorderColor: '#249EBF',
-            data: topAffiliations.data,
-          }
-        ]
-      }
+      var countryInitialText = "And from the country information (generated from the author data), we can see that the top 1 country, in this case " + this.chartData.topCountries.labels[0] + ", has made " + String(((this.chartData.topCountries.data[0] - this.chartData.topCountries.data[1]) / this.chartData.topCountries.data[1] * 100).toFixed(2)) + "% more submission than the second-placed " + this.chartData.topCountries.labels[1] + ".";
 
       return {
         msg: 'Chart View Component',
-        text: {
-          val: 'This is update of input!!',
-          edit: false
-        },
-        author: topAuthorData,
-        dataEntries: [
-          {
-            data: topCountryData,
-            text: {
-              val: countryInitialText,
-              edit: false
-            },
-            options: [
-              {
-                value: 'pie',
-                label: 'Pie Chart'
-              }, {
-                value: 'bar',
-                label: 'Bar Chart'
-              }
-            ],
-            type: 'bar'
-          },
-          {
-            data: topAffiliationData,
-            text: {
-              val: 'You may add in any additional remarks here.',
-              edit: false
-            },
-            options: [
-              {
-                value: 'pie',
-                label: 'Pie Chart'
-              }, {
-                value: 'bar',
-                label: 'Bar Chart'
-              }
-            ],
-            type: 'pie'
-          }
-        ],
-        // country: topCountryData,
-        // affiliation: topAffiliationData,
         authorText: {
           val: authorInitialText,
           edit: false
         },
-        // countryText: {
-        //   val: countryInitialText,
-        //   edit: false
-        // },
-        // remarks: {
-        //   val: 'You may add in any additional remarks here.',
-        //   edit: false
-        // },
-        // options: [
-        //   {
-        //     value: 'pie',
-        //     label: 'Pie Chart'
-        //   }, {
-        //     value: 'bar',
-        //     label: 'Bar Chart'
-        //   }
-        // ],
-        // type: 'bar'
+        countryText: {
+          val: countryInitialText,
+          edit: false
+        },
+        affiliationText: {
+          val: "You may add in any additional remarks here.",
+          edit: false
+        },
+        topAuthors: this.chartData.topAuthors,
+        topCountries: this.chartData.topCountries,
+        topAffiliations: this.chartData.topAffiliations,
+        chartOptions: [
+          {
+            value: 'pie',
+            label: 'Pie Chart'
+          }, {
+            value: 'bar',
+            label: 'Bar Chart'
+          }
+        ],
+        countryChartType: 'pie',
+        affiliationChartType: 'bar',
+        dataLengthOptions: [
+          {
+            value: 3,
+            label: '3'
+          }, {
+            value: 5,
+            label: '5'
+          }, {
+            value: 10,
+            label: '10'
+          }
+        ],
+        authorDataLength: 3,
+        countryDataLength: 3,
+        affiliationDataLength: 3,
+        authorChartIncluded: true,
+        countryChartIncluded: true,
+        affiliationChartIncluded: true,
+        topAuthorData: this.computeAuthorData(3),
+        topCountryData: this.computeCountryData(3),
+        topAffiliationData: this.computeAffiliationData(3),
       }
     } else if (this.infoType == 'reviewScore') {
       return {
@@ -268,6 +212,100 @@ export default {
 
   },
   methods: {
+    chooseColorScheme: function(len) {
+      switch (len) {
+        case 3:
+          return Const.colorScheme3;
+        case 5:
+          return Const.colorScheme5;
+        default:
+          return Const.colorScheme10;
+      }
+    },
+    computeAuthorData: function(len) {
+      // var len = this.authorDataLength;
+      var scheme = this.chooseColorScheme(len);
+      var topAuthorData = {
+        labels: this.chartData.topAuthors.labels.slice(0, len),
+        datasets: [
+          {
+            label: 'Submission Counts',
+            backgroundColor: scheme,
+            pointBackgroundColor: 'white',
+            borderWidth: 1,
+            pointBorderColor: '#249EBF',
+            data: this.chartData.topAuthors.data.slice(0, len),
+          }
+        ]
+      }
+      return topAuthorData;
+    },
+    computeCountryData: function(len) {
+      // var len = this.countryDataLength;
+      var scheme = this.chooseColorScheme(len);
+      var topCountryData = {
+        labels: this.chartData.topCountries.labels.slice(0, len),
+        datasets: [
+          {
+            label: 'Submission Counts',
+            backgroundColor: scheme,
+            pointBackgroundColor: 'white',
+            borderWidth: 1,
+            pointBorderColor: '#249EBF',
+            data: this.chartData.topCountries.data.slice(0, len),
+          }
+        ]
+      }
+      return topCountryData;
+    },
+    computeAffiliationData: function(len) {
+      // var len = this.affiliationDataLength;
+      var scheme = this.chooseColorScheme(len);
+      var topAffiliationData = {
+        labels: this.chartData.topAffiliations.labels.slice(0, len),
+        datasets: [
+          {
+            label: 'Submission Counts',
+            backgroundColor: scheme,
+            pointBackgroundColor: 'white',
+            borderWidth: 1,
+            pointBorderColor: '#249EBF',
+            data: this.chartData.topAffiliations.data.slice(0, len),
+          }
+        ]
+      }
+      return topAffiliationData;
+    }
+  },
+  watch: {
+    authorDataLength: function(newValue, oldValue) {
+      var len = newValue;
+      var authorInitialText = "So it's rather clear that the one with the largest number of submissions this year is: " + this.topAuthors.labels[0] + ", and all the top " + String(len) + ", putting together, contribute " + String(this.topAuthors.data.slice(0, len).reduce(function(a, b) {return a + b;})) + " submissions in total.";
+      this.authorText = {
+        val: authorInitialText,
+        edit: false
+      }
+      this.topAuthorData = this.computeAuthorData(len);
+    },
+    countryDataLength: function(newValue, oldValue) {
+      var len = newValue;
+      var countryInitialText = "And from the country information (generated from the author data), we can see that the top 1 country, in this case " + this.topCountries.labels[0] + ", has made " + String(((this.topCountries.data[0] - this.topCountries.data[1]) / this.topCountries.data[1] * 100).toFixed(2)) + "% more submission than the second-placed " + this.topCountries.labels[1] + ".";
+      this.countryText = {
+        val: countryInitialText,
+        edit: false
+      }
+      console.log("Inside the data length trigger!");
+      this.topCountryData = this.computeCountryData(len);
+    },
+    affiliationDataLength: function(newValue, oldValue) {
+      var len = newValue;
+      var affiliationInitialText = "You may add in any additional remarks here.";
+      this.affiliationText = {
+        val: affiliationInitialText,
+        edit: false
+      }
+      this.topAffiliationData = this.computeAffiliationData(len);
+    }
   },
   components: {
     LineChart,
@@ -278,7 +316,6 @@ export default {
   },
   beforeRouteUpdate(to, from, next) {
     console.log("inside haha");
-
     next();
   },
 }
