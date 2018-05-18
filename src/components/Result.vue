@@ -67,6 +67,7 @@
         </el-option>
       </el-select>
       <vue-word-cloud :words="wordCloudByTrack[wordCloudSelectedTrack]" :animationDuration="100" font-family="Roboto" style="width: 70%;height: 200px"></vue-word-cloud>
+      <el-button @click="saveToPdf" type="success">Save</el-button>
 
     </div> <!--End of Submission Component-->
 
@@ -96,6 +97,7 @@ import EditableText from '@/components/EditableText'
 import Const from './const'
 
 import VueWordCloud from 'vuewordcloud'
+import jsPDF from 'jspdf'
 
 export default {
   name: 'Chart',
@@ -257,6 +259,12 @@ export default {
 
   },
   methods: {
+    saveToPdf: function() {
+      let fileName = 'Visual Analysis';
+      var doc = new jsPDF();
+      doc.text("Hello World", 10, 10);
+      doc.save(fileName + ".pdf");
+    },
     chooseColorScheme: function(len) {
       switch (len) {
         case 3:
