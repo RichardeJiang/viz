@@ -1,15 +1,5 @@
 <template>
   <div class="hello">
-    <div id="header" v-if="infoType === 'dummy'">
-      <el-select v-model="type" placeholder="Select" style="">
-        <el-option
-          v-for="item in options"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value">
-        </el-option>
-      </el-select>
-    </div>
     <h1>{{ msg }}</h1>
     <div v-if="infoType === 'author'"> <!--Start of Author Component-->
 
@@ -62,6 +52,22 @@
     <div v-else-if="infoType === 'submission'"> <!--Start of Submission Component-->
       <line-chart :data-input="historicalAcceptanceRate" :title-text="'Past Acceptance Rates'" class="chart"></line-chart>
       <bar-chart-deci :data-input="acceptanceRateByTrackData" :title-text="'Acceptance Rate By Track'" class="chart"></bar-chart-deci>
+      <!--Note: due to the constraint of the component, the style width and height must be specified-->
+      <h3>Word Cloud for All Submissions</h3>
+      <vue-word-cloud :words="wordCloudTotal" :animationDuration="50" font-family="Roboto" style="width: 70%;height: 200px"></vue-word-cloud>
+      <h3>Word Cloud for Accepted Papers</h3>
+      <vue-word-cloud :words="acceptedWordCloud" :animationDuration="50" font-family="Roboto" style="width: 70%;height: 200px"></vue-word-cloud>
+      <h3>Word Cloud for Submissions by Track</h3>
+      <el-select v-model="wordCloudSelectedTrack" placeholder="Select Length" style="margin-top: 20px;margin-right: 10px">
+        <el-option
+          v-for="item in trackOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+      <vue-word-cloud :words="wordCloudByTrack[wordCloudSelectedTrack]" :animationDuration="100" font-family="Roboto" style="width: 70%;height: 200px"></vue-word-cloud>
+
     </div> <!--End of Submission Component-->
 
 
@@ -88,6 +94,8 @@ import PieChart from '@/components/PieChart'
 import EditableText from '@/components/EditableText'
 
 import Const from './const'
+
+import VueWordCloud from 'vuewordcloud'
 
 export default {
   name: 'Chart',
@@ -187,8 +195,11 @@ export default {
         acceptanceRateSelectedTrack: 'Full Papers',
         wordCloudSelectedTrack: 'Full Papers',
         trackOptions: this.getTrackInSubmission().map(function (track) {return {value: track, label: track};}),
-        wordCloudTotal: this.computeTopWordClouds(this.chartData.overallKeywordMap),
-        acceptedWordCloud: this.computeTopWordClouds(this.chartData.acceptedKeywordMap),
+        wordCloudTotal: this.chartData.overallKeywordList,
+        // wordCloudTotal: this.computeTopWordClouds(this.chartData.overallKeywordMap),
+        acceptedWordCloud: this.chartData.acceptedKeywordList,
+        wordCloudByTrack: this.chartData.keywordsByTrack,
+        // acceptedWordCloud: this.computeTopWordClouds(this.chartData.acceptedKeywordMap),
         // wordCloudByTrack: this.getTrackInSubmission().map(function (track) {
         //   return {
         //     track: this.computeTopWordClouds(this.chartData.keywordsByTrack[track])
@@ -424,7 +435,8 @@ export default {
     BarChartDeci,
     HoriBarChart,
     PieChart,
-    EditableText
+    EditableText,
+    [VueWordCloud.name]: VueWordCloud,
   },
   beforeRouteUpdate(to, from, next) {
     console.log("inside haha");

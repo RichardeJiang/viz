@@ -13,6 +13,8 @@ import 'echarts/lib/component/tooltip'
 import 'echarts/lib/component/polar'
 import 'echarts/lib/chart/line'
 
+// import VueWordCloud from 'vuewordcloud';
+
 import App from './App'
 import router from './router'
 
@@ -20,6 +22,7 @@ Vue.config.productionTip = false
 Vue.use(ElementUI)
 
 Vue.component('chart', ECharts)
+// Vue.component(VueWordCloud.name, VueWordCloud)
 // Vue.use(ECharts)
 
 /* eslint-disable no-new */
