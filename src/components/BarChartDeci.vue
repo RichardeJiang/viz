@@ -1,10 +1,10 @@
 <script>
   //Importing Line class from the vue-chartjs wrapper
-  import {Line} from 'vue-chartjs'
+  import {Bar} from 'vue-chartjs'
   //Exporting this so it can be used in other components
 
   export default {
-    extends: Line,
+    extends: Bar,
     props: ['dataInput', 'titleText'],
     computed: {
       chartData: function() {
@@ -24,6 +24,11 @@
             yAxes: [{
               ticks: {
                 beginAtZero: true,
+                // callback: function(value, index, values) {
+                //     if (Math.floor(value) === value) {
+                //         return value;
+                //     }
+                // }
                 // stepSize: 1
               },
               gridLines: {
@@ -48,7 +53,7 @@
       }
     },
     mounted () {
-      // this.renderChart(this.dataInput, this.options);
+      // this.renderChart(this.dataInput, this.options)
       this.render();
     },
     methods: {
@@ -59,9 +64,10 @@
     watch: { 
       dataInput: function() {
         console.log("Got it in the bar chart!");
+        // this.renderChart(this.dataInput, this.options); 
         this.$data._chart.destroy();
         this.render();
-        // this.renderChart(this.dataInput, this.options); 
+        // this._chart.update();
       } 
     }
   }

@@ -11,7 +11,7 @@
       </el-select>
     </div>
     <h1>{{ msg }}</h1>
-    <div v-if="infoType === 'author'">
+    <div v-if="infoType === 'author'"> <!--Start of Author Component-->
 
       <bar-chart :data-input="topAuthorData" :title-text="'Top Authors'" class="chart"></bar-chart>
       <editable-text v-bind:text.sync="authorText"></editable-text>
@@ -32,7 +32,6 @@
           :value="item.value">
         </el-option>
       </el-select>
-      <!--hori-bar-chart :dataInput="computeCountryData()" :titleText="'Top Countries'" class="chart" v-if="countryChartType=='bar'"></hori-bar-chart-->
       <hori-bar-chart v-bind:data-input="topCountryData" :title-text="'Top Countries'" class="chart" v-if="countryChartType=='bar'"></hori-bar-chart>
       <pie-chart v-bind:data-input="topCountryData" :title-text="'Top Countries'" class="chart" v-else-if="countryChartType=='pie'"></pie-chart>
       <editable-text v-bind:text.sync="countryText"></editable-text>
@@ -57,21 +56,32 @@
       <pie-chart :data-input="topAffiliationData" :title-text="'Top Affiliations'" class="chart" v-else-if="affiliationChartType=='pie'"></pie-chart>
       <editable-text v-bind:text.sync="affiliationText"></editable-text>
 
-    </div>
-    <div v-else-if="infoType === 'submission'">
-    </div>
-    <div v-else-if="infoType === 'review'">
-    </div>
-    <div v-else-if="infoType === 'dummy'"> <!--Unknown file, so http returned the dummy data-->
+    </div> <!--End of Author Component-->
+
+
+    <div v-else-if="infoType === 'submission'"> <!--Start of Submission Component-->
+      <line-chart :data-input="historicalAcceptanceRate" :title-text="'Past Acceptance Rates'" class="chart"></line-chart>
+      <bar-chart-deci :data-input="acceptanceRateByTrackData" :title-text="'Acceptance Rate By Track'" class="chart"></bar-chart-deci>
+    </div> <!--End of Submission Component-->
+
+
+    <div v-else-if="infoType === 'review'"> <!--Start of Review Component-->
+    </div> <!--End of Review Component-->
+
+
+    <div v-else-if="infoType === 'dummy'"> <!--Start of Dummy Component-->
       <line-chart :dataInput="data" v-if="type == 'line'"></line-chart>
       <bar-chart :dataInput="data" v-else-if="type == 'bar'"></bar-chart>
-    </div>
+    </div> <!--End of Dummy Component-->
+
+
   </div>
 </template>
 
 <script>
 import LineChart from '@/components/LineChart'
 import BarChart from '@/components/BarChart'
+import BarChartDeci from '@/components/BarChartDeci'
 import HoriBarChart from '@/components/HoriBarChart'
 import PieChart from '@/components/PieChart'
 
@@ -166,6 +176,30 @@ export default {
         ],
         type: 'bar'
       }
+
+    } else if (this.infoType == 'submission') {
+
+      console.log("inside submission subsection");
+
+      return {
+        msg: 'Submission Analysis Result',
+        acceptanceRate: this.chartData.acceptanceRate.toFixed(2),
+        acceptanceRateSelectedTrack: 'Full Papers',
+        wordCloudSelectedTrack: 'Full Papers',
+        trackOptions: this.getTrackInSubmission().map(function (track) {return {value: track, label: track};}),
+        wordCloudTotal: this.computeTopWordClouds(this.chartData.overallKeywordMap),
+        acceptedWordCloud: this.computeTopWordClouds(this.chartData.acceptedKeywordMap),
+        // wordCloudByTrack: this.getTrackInSubmission().map(function (track) {
+        //   return {
+        //     track: this.computeTopWordClouds(this.chartData.keywordsByTrack[track])
+        //   };
+        // }),
+        acceptanceRateByTrackData: this.computeAcceptanceRateByTrack(),
+        topAcceptedAuthorsData: this.computeTopAcceptedAuthors(),
+        historicalAcceptanceRate: this.computeHistoricalAcceptanceRate(),
+      }
+
+    } else if (this.infoType == 'review') {
 
     } else { // dummy data input
       var yearInfo = this.chartData.year;
@@ -275,7 +309,84 @@ export default {
         ]
       }
       return topAffiliationData;
-    }
+    },
+    getTrackInSubmission: function() {
+      return Object.keys(this.chartData.acceptanceRateByTrack);
+    },
+    computeTopWordClouds: function(wordCountMap) {
+      var wordsSorted = Object.keys(wordCountMap).sort(function(a, b){return wordCountMap[b]-wordCountMap[a]}).slice(0, 20);
+      var topWordCloud = {};
+      wordsSorted.forEach(function( word ) {
+        topWordCloud[word] = wordCountMap[word];
+      });
+      return topWordCloud;
+    },
+    computeAcceptanceRateByTrack: function() {
+      var tracks = this.getTrackInSubmission();
+      var values = [];
+      for(var track in tracks) {
+        values.push(this.chartData.acceptanceRateByTrack[tracks[track]].toFixed(2));
+      }
+      return {
+        labels: tracks,
+        datasets: [
+          {
+            label: 'Acceptance Rate',
+            backgroundColor: this.chooseColorScheme(10),
+            pointBackgroundColor: 'white',
+            borderWidth: 1,
+            pointBorderColor: '#249EBF',
+            data: values,
+          }
+        ]
+      }
+    },
+    computeTopAcceptedAuthors: function() {
+      var authors = Object.keys(this.chartData.topAcceptedAuthors);
+      var values = [];
+      for (var author in authors) {
+        values.push(this.chartData.topAcceptedAuthors[author]);
+      }
+      // var values = authors.map(function(author) {return this.chartData.topAcceptedAuthors[author];});
+      return {
+        labels: authors,
+        datasets: [
+          {
+            label: 'Accepted Papers',
+            backgroundColor: this.chooseColorScheme(10),
+            pointBackgroundColor: 'white',
+            borderWidth: 1,
+            pointBorderColor: '#249EBF',
+            data: values,
+          }
+        ]
+      }
+    },
+    computeHistoricalAcceptanceRate: function() {
+      var years = this.chartData.comparableAcceptanceRate.year;
+      console.log("got to the acceptance rate function");
+      return {
+        labels: years,
+        datasets: [
+          {
+            label: 'Full Papers',
+            backgroundColor: this.chooseColorScheme(10),
+            pointBackgroundColor: 'white',
+            borderWidth: 1,
+            pointBorderColor: '#249EBF',
+            data: this.chartData.comparableAcceptanceRate['Full Papers'],
+          },
+          {
+            label: 'Short Papers',
+            backgroundColor: this.chooseColorScheme(10),
+            pointBackgroundColor: 'white',
+            borderWidth: 1,
+            pointBorderColor: '#249EBF',
+            data: this.chartData.comparableAcceptanceRate['Short Papers'],
+          }
+        ]
+      }
+    },
   },
   watch: {
     authorDataLength: function(newValue, oldValue) {
@@ -310,6 +421,7 @@ export default {
   components: {
     LineChart,
     BarChart,
+    BarChartDeci,
     HoriBarChart,
     PieChart,
     EditableText
