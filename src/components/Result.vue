@@ -53,8 +53,19 @@
 
     <div v-else-if="infoType === 'submission'"> <!--Start of Submission Component-->
       <time-line-chart :data-input="timeSeriesData" :title-text="'Submission Time Series'" class="chart"></time-line-chart>
-      <line-chart :data-input="historicalAcceptanceRate" :title-text="'Past Acceptance Rates'" class="chart"></line-chart>
-      <bar-chart-deci :data-input="acceptanceRateByTrackData" :title-text="'Acceptance Rate By Track'" class="chart"></bar-chart-deci>
+      <line-chart :data-input="historicalAcceptanceRate" :title-text="'Past Years Acceptance Rates'" class="chart"></line-chart>
+
+      <el-select v-model="acceptanceRateChartType" placeholder="Select Chart" style="margin-top: 20px; margin-right: 10px">
+        <el-option
+          v-for="item in chartOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+      <bar-chart-deci :data-input="acceptanceRateByTrackData" :title-text="'Acceptance Rate By Track'" class="chart" v-if="acceptanceRateChartType=='bar'"></bar-chart-deci>
+      <radar-chart :data-input="acceptanceRateByTrackData" :title-text="'Acceptance Rate By Track'" class="chart" v-else-if="acceptanceRateChartType=='radar'"></radar-chart>
+
       <!--Note: due to the constraint of the component, the style width and height must be specified-->
       <h3>Word Cloud for All Submissions</h3>
       <vue-word-cloud :words="wordCloudTotal" :animationDuration="50" font-family="Roboto" style="width: 70%;height: 200px"></vue-word-cloud>
@@ -91,6 +102,7 @@
 <script>
 import LineChart from '@/components/LineChart'
 import TimeLineChart from '@/components/TimeLineChart'
+import RadarChart from '@/components/RadarChart'
 import BarChart from '@/components/BarChart'
 import BarChartDeci from '@/components/BarChartDeci'
 import HoriBarChart from '@/components/HoriBarChart'
@@ -202,6 +214,16 @@ export default {
         acceptanceRateSelectedTrack: 'Full Papers',
         wordCloudSelectedTrack: 'Full Papers',
         trackOptions: this.getTrackInSubmission().map(function (track) {return {value: track, label: track};}),
+        chartOptions: [
+          {
+            value: 'bar',
+            label: 'Bar Chart'
+          }, {
+            value: 'radar',
+            label: 'Radar Chart'
+          }
+        ],
+        acceptanceRateChartType: 'bar',
         wordCloudTotal: this.chartData.overallKeywordList,
         // wordCloudTotal: this.computeTopWordClouds(this.chartData.overallKeywordMap),
         acceptedWordCloud: this.chartData.acceptedKeywordList,
@@ -423,7 +445,7 @@ export default {
             fill: false,
             pointBackgroundColor: 'white',
             borderWidth: 2,
-            pointBorderColor: '#249EBF',
+            pointBorderColor: 'blue',
             data: this.chartData.comparableAcceptanceRate['Full Papers'],
           },
           {
@@ -433,7 +455,7 @@ export default {
             fill: false,
             pointBackgroundColor: 'white',
             borderWidth: 2,
-            pointBorderColor: '#249EBF',
+            pointBorderColor: 'red',
             data: this.chartData.comparableAcceptanceRate['Short Papers'],
           }
         ]
@@ -447,14 +469,16 @@ export default {
             label: 'Submit Time',
             data: this.chartData.timeSeries,
             fill: false,
-            pointBorderColor: '#249EBF',
+            // pointBorderColor: '#249EBF',
+            radius: 0,
             borderColor: 'blue'
           },
           {
             label: 'Last Edit Time',
             data: this.chartData.lastEditSeries,
             fill: false,
-            pointBorderColor: '#249EBF',
+            // pointBorderColor: '#249EBF',
+            radius: 0,
             borderColor: 'red'
           }
         ]
@@ -495,6 +519,7 @@ export default {
   components: {
     LineChart,
     TimeLineChart,
+    RadarChart,
     BarChart,
     BarChartDeci,
     HoriBarChart,

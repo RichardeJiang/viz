@@ -1,10 +1,10 @@
 <script>
   //Importing Line class from the vue-chartjs wrapper
-  import {Line} from 'vue-chartjs'
+  import {Radar} from 'vue-chartjs'
   //Exporting this so it can be used in other components
 
   export default {
-    extends: Line,
+    extends: Radar,
     props: ['dataInput', 'titleText'],
     computed: {
       chartData: function() {
@@ -17,27 +17,7 @@
         options: {
           title: {
             display: true,
-            text: this.titleText,
-            fontSize: 14
-          },
-          scales: {
-            yAxes: [{
-              ticks: {
-                beginAtZero: false,
-                // stepSize: 1
-              },
-              gridLines: {
-                display: true
-              }
-            }],
-            xAxes: [ {
-              gridLines: {
-                display: false
-              },
-              ticks: {
-                autoSkip: false
-              }
-            }]
+            text: this.titleText
           },
           legend: {
             display: true
@@ -62,6 +42,7 @@
         this.$data._chart.destroy();
         this.render();
         // this.renderChart(this.dataInput, this.options); 
+        // this._chart.update();
       } 
     }
   }
