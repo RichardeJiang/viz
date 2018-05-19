@@ -52,6 +52,7 @@
 
 
     <div v-else-if="infoType === 'submission'"> <!--Start of Submission Component-->
+      <time-line-chart :data-input="timeSeriesData" :title-text="'Submission Time Series'" class="chart"></time-line-chart>
       <line-chart :data-input="historicalAcceptanceRate" :title-text="'Past Acceptance Rates'" class="chart"></line-chart>
       <bar-chart-deci :data-input="acceptanceRateByTrackData" :title-text="'Acceptance Rate By Track'" class="chart"></bar-chart-deci>
       <!--Note: due to the constraint of the component, the style width and height must be specified-->
@@ -69,7 +70,7 @@
         </el-option>
       </el-select>
       <vue-word-cloud :words="wordCloudByTrack[wordCloudSelectedTrack]" :animationDuration="100" font-family="Roboto" style="width: 70%;height: 200px"></vue-word-cloud>
-      <el-button @click="saveToPdf" type="success" plain style="margin-top: 40px">Save</el-button>
+      <el-button @click="saveToPdf" type="success" plain style="margin-top: 20px">Save</el-button>
 
     </div> <!--End of Submission Component-->
 
@@ -89,6 +90,7 @@
 
 <script>
 import LineChart from '@/components/LineChart'
+import TimeLineChart from '@/components/TimeLineChart'
 import BarChart from '@/components/BarChart'
 import BarChartDeci from '@/components/BarChartDeci'
 import HoriBarChart from '@/components/HoriBarChart'
@@ -213,6 +215,7 @@ export default {
         acceptanceRateByTrackData: this.computeAcceptanceRateByTrack(),
         topAcceptedAuthorsData: this.computeTopAcceptedAuthors(),
         historicalAcceptanceRate: this.computeHistoricalAcceptanceRate(),
+        timeSeriesData: this.computeTimeSeriesData(),
       }
 
     } else if (this.infoType == 'review') {
@@ -415,23 +418,49 @@ export default {
         datasets: [
           {
             label: 'Full Papers',
-            backgroundColor: this.chooseColorScheme(10),
+            // backgroundColor: this.chooseColorScheme(10),
+            borderColor: 'blue',
+            fill: false,
             pointBackgroundColor: 'white',
-            borderWidth: 1,
+            borderWidth: 2,
             pointBorderColor: '#249EBF',
             data: this.chartData.comparableAcceptanceRate['Full Papers'],
           },
           {
             label: 'Short Papers',
-            backgroundColor: this.chooseColorScheme(10),
+            // backgroundColor: this.chooseColorScheme(10),
+            borderColor: 'red',
+            fill: false,
             pointBackgroundColor: 'white',
-            borderWidth: 1,
+            borderWidth: 2,
             pointBorderColor: '#249EBF',
             data: this.chartData.comparableAcceptanceRate['Short Papers'],
           }
         ]
       }
     },
+    computeTimeSeriesData: function() {
+      var time = this.chartData.timeSeries.time;
+      return {
+        datasets: [
+          {
+            label: 'Submit Time',
+            data: this.chartData.timeSeries,
+            fill: false,
+            pointBorderColor: '#249EBF',
+            borderColor: 'blue'
+          },
+          {
+            label: 'Last Edit Time',
+            data: this.chartData.lastEditSeries,
+            fill: false,
+            pointBorderColor: '#249EBF',
+            borderColor: 'red'
+          }
+        ]
+      }
+
+    }
   },
   watch: {
     authorDataLength: function(newValue, oldValue) {
@@ -465,6 +494,7 @@ export default {
   },
   components: {
     LineChart,
+    TimeLineChart,
     BarChart,
     BarChartDeci,
     HoriBarChart,
