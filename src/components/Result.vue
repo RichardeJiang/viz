@@ -100,6 +100,23 @@
     <div v-else-if="infoType === 'review'"> <!--Start of Review Component-->
       <bar-chart :data-input="scoreDistributionData" :title-text="'Score Distribution'" class="chart"></bar-chart>
       <bar-chart :data-input="recommendDistributionData" :title-text="'Recommendation Distribution'" class="chart"></bar-chart>
+      <p>
+        The mean scores and mean confidence values can be found as follows:
+        <el-table
+          :data="reviewTableData"
+          style="width: 70%;margin-top:10px">
+          <el-table-column
+            prop="field"
+            label="Field"
+            width="180">
+          </el-table-column>
+          <el-table-column
+            prop="value"
+            label="Value"
+            width="180">
+          </el-table-column>
+        </el-table>
+      </p>
     </div> <!--End of Review Component-->
 
 
@@ -260,11 +277,22 @@ export default {
       }
 
     } else if (this.infoType == 'review') {
-
       return {
         msg: 'Review Info Analysis',
         scoreDistributionData: this.computeScoreDistributionData("score"),
         recommendDistributionData: this.computeScoreDistributionData("recommend"),
+        reviewTableData: [
+          {
+            field: 'Mean Score',
+            value: this.chartData.meanScore.toFixed(2)
+          }, {
+            field: 'Mean Recommendation',
+            value: this.chartData.meanRecommend.toFixed(2)
+          }, {
+            field: 'Mean Confidence',
+            value: this.chartData.meanConfidence.toFixed(2)
+          }
+        ],
       }
 
     } else { // dummy data input
@@ -524,7 +552,7 @@ export default {
           pointBorderColor: '#249EBF',
         }]
       }
-    }
+    },
   },
   watch: {
     authorDataLength: function(newValue, oldValue) {
