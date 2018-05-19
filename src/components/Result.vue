@@ -4,6 +4,7 @@
     <div v-if="infoType === 'author'"> <!--Start of Author Component-->
 
       <bar-chart :data-input="topAuthorData" :title-text="'Top Authors'" class="chart" id="testpdf" ref="testpdf"></bar-chart>
+      <!--using text.sync for two-way data binding to editable text child component-->
       <editable-text v-bind:text.sync="authorText"></editable-text>
 
       <el-select v-model="countryChartType" placeholder="Select Chart" style="margin-top: 20px;margin-right: 10px">
@@ -97,6 +98,8 @@
 
 
     <div v-else-if="infoType === 'review'"> <!--Start of Review Component-->
+      <bar-chart :data-input="scoreDistributionData" :title-text="'Score Distribution'" class="chart"></bar-chart>
+      <bar-chart :data-input="recommendDistributionData" :title-text="'Recommendation Distribution'" class="chart"></bar-chart>
     </div> <!--End of Review Component-->
 
 
@@ -137,7 +140,7 @@ export default {
       var countryInitialText = "And from the country information (generated from the author data), we can see that the top 1 country, in this case " + this.chartData.topCountries.labels[0] + ", has made " + String(((this.chartData.topCountries.data[0] - this.chartData.topCountries.data[1]) / this.chartData.topCountries.data[1] * 100).toFixed(2)) + "% more submission than the second-placed " + this.chartData.topCountries.labels[1] + ".";
 
       return {
-        msg: 'Chart View Component',
+        msg: 'Author Info Analysis',
         authorText: {
           val: authorInitialText,
           edit: false
@@ -188,7 +191,7 @@ export default {
       }
     } else if (this.infoType == 'reviewScore') {
       return {
-        msg: 'Statistics View Component',
+        msg: 'Statistics',
         yesPercentage: this.chartData.yesPercentage.toFixed(2),
         meanScore: this.chartData.meanScore,
         meanConfidence: this.chartData.meanConfidence,
@@ -216,10 +219,10 @@ export default {
 
     } else if (this.infoType == 'submission') {
 
-      console.log("inside submission subsection");
+      // console.log("inside submission subsection");
 
       return {
-        msg: 'Submission Analysis Result',
+        msg: 'Submission Info Analysis',
         acceptanceRate: this.chartData.acceptanceRate.toFixed(2),
         acceptanceRateSelectedTrack: 'Full Papers',
         wordCloudSelectedTrack: 'Full Papers',
@@ -257,6 +260,12 @@ export default {
       }
 
     } else if (this.infoType == 'review') {
+
+      return {
+        msg: 'Review Info Analysis',
+        scoreDistributionData: this.computeScoreDistributionData("score"),
+        recommendDistributionData: this.computeScoreDistributionData("recommend"),
+      }
 
     } else { // dummy data input
       var yearInfo = this.chartData.year;
@@ -500,7 +509,21 @@ export default {
           }
         ]
       }
-
+    },
+    computeScoreDistributionData: function(type) {
+      // Type: "score" or "recommend"
+      var label = type == "score"? 'Average Score':'Average Recommendation';
+      var rawData = type == "score"? this.chartData.scoreDistribution:this.chartData.recommendDistribution;
+      return {
+        labels: rawData.labels,
+        datasets: [{
+          label: label,
+          data: rawData.counts,
+          pointBackgroundColor: 'white',
+          borderWidth: 1,
+          pointBorderColor: '#249EBF',
+        }]
+      }
     }
   },
   watch: {
