@@ -66,13 +66,23 @@
       <bar-chart-deci :data-input="acceptanceRateByTrackData" :title-text="'Acceptance Rate By Track'" class="chart" v-if="acceptanceRateChartType=='bar'"></bar-chart-deci>
       <radar-chart :data-input="acceptanceRateByTrackData" :title-text="'Acceptance Rate By Track'" class="chart" v-else-if="acceptanceRateChartType=='radar'"></radar-chart>
 
+      <el-select v-model="topAcceptedAuthorsDataLength" placeholder="Select Length" style="margin-top: 20px;margin-right: 10px">
+        <el-option
+          v-for="item in dataLengthOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+      <hori-bar-chart :data-input="topAcceptedAuthorsData" :title-text="'Top Accepted Authors'" class="chart"></hori-bar-chart>
+
       <!--Note: due to the constraint of the component, the style width and height must be specified-->
-      <h3>Word Cloud for All Submissions</h3>
+      <h4>Word Cloud for All Submissions</h4>
       <vue-word-cloud :words="wordCloudTotal" :animationDuration="50" font-family="Roboto" style="width: 70%;height: 200px"></vue-word-cloud>
-      <h3>Word Cloud for Accepted Papers</h3>
+      <h4>Word Cloud for Accepted Papers</h4>
       <vue-word-cloud :words="acceptedWordCloud" :animationDuration="50" font-family="Roboto" style="width: 70%;height: 200px"></vue-word-cloud>
-      <h3>Word Cloud for Submissions by Track</h3>
-      <el-select v-model="wordCloudSelectedTrack" placeholder="Select Length" style="margin-top: 20px;margin-right: 10px">
+      <h4>Word Cloud for Submissions by Track</h4>
+      <el-select v-model="wordCloudSelectedTrack" placeholder="Select Length" style="margin-top: 10px;margin-right: 10px">
         <el-option
           v-for="item in trackOptions"
           :key="item.value"
@@ -223,19 +233,25 @@ export default {
             label: 'Radar Chart'
           }
         ],
+        dataLengthOptions: [
+          {
+            value: 3,
+            label: '3'
+          }, {
+            value: 5,
+            label: '5'
+          }, {
+            value: 10,
+            label: '10'
+          }
+        ],
         acceptanceRateChartType: 'bar',
         wordCloudTotal: this.chartData.overallKeywordList,
-        // wordCloudTotal: this.computeTopWordClouds(this.chartData.overallKeywordMap),
         acceptedWordCloud: this.chartData.acceptedKeywordList,
         wordCloudByTrack: this.chartData.keywordsByTrack,
-        // acceptedWordCloud: this.computeTopWordClouds(this.chartData.acceptedKeywordMap),
-        // wordCloudByTrack: this.getTrackInSubmission().map(function (track) {
-        //   return {
-        //     track: this.computeTopWordClouds(this.chartData.keywordsByTrack[track])
-        //   };
-        // }),
         acceptanceRateByTrackData: this.computeAcceptanceRateByTrack(),
-        topAcceptedAuthorsData: this.computeTopAcceptedAuthors(),
+        topAcceptedAuthorsData: this.computeTopAcceptedAuthors(3),
+        topAcceptedAuthorsDataLength: 3,
         historicalAcceptanceRate: this.computeHistoricalAcceptanceRate(),
         timeSeriesData: this.computeTimeSeriesData(),
       }
@@ -411,19 +427,18 @@ export default {
         ]
       }
     },
-    computeTopAcceptedAuthors: function() {
-      var authors = Object.keys(this.chartData.topAcceptedAuthors);
-      var values = [];
-      for (var author in authors) {
-        values.push(this.chartData.topAcceptedAuthors[author]);
-      }
+    computeTopAcceptedAuthors: function(len) {
+      var authors = this.chartData.topAcceptedAuthors.names.slice(0, len);
+      // var authors = Object.keys(this.chartData.topAcceptedAuthors);
+      var values = this.chartData.topAcceptedAuthors.counts.slice(0, len);
+      var scheme = this.chooseColorScheme(len);
       // var values = authors.map(function(author) {return this.chartData.topAcceptedAuthors[author];});
       return {
         labels: authors,
         datasets: [
           {
             label: 'Accepted Papers',
-            backgroundColor: this.chooseColorScheme(10),
+            backgroundColor: scheme,
             pointBackgroundColor: 'white',
             borderWidth: 1,
             pointBorderColor: '#249EBF',
@@ -446,6 +461,7 @@ export default {
             pointBackgroundColor: 'white',
             borderWidth: 2,
             pointBorderColor: 'blue',
+            pointHoverRadius: 5,
             data: this.chartData.comparableAcceptanceRate['Full Papers'],
           },
           {
@@ -456,6 +472,7 @@ export default {
             pointBackgroundColor: 'white',
             borderWidth: 2,
             pointBorderColor: 'red',
+            pointHoverRadius: 5,
             data: this.chartData.comparableAcceptanceRate['Short Papers'],
           }
         ]
@@ -514,6 +531,10 @@ export default {
         edit: false
       }
       this.topAffiliationData = this.computeAffiliationData(len);
+    },
+    topAcceptedAuthorsDataLength: function(newValue, oldValue) {
+      var len = newValue;
+      this.topAcceptedAuthorsData = this.computeTopAcceptedAuthors(len);
     }
   },
   components: {

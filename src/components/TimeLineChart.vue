@@ -33,7 +33,7 @@
             xAxes: [ {
               type: "time",
               time: {
-                format: "YYYY-MM-DD",
+                parser: "YYYY-MM-DD",
                 tooltipFormat: 'll'
               },
               gridLines: {
