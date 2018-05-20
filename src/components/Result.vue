@@ -366,6 +366,12 @@ export default {
     } else if (this.infoType == 'submission') {
 
       // console.log("inside submission subsection");
+      var tracks = this.computeAcceptanceRateByTrack().labels;
+      var acceptanceRate = this.computeAcceptanceRateByTrack().datasets[0].data;
+
+      var topIndex = this.indexOfMax(acceptanceRate);
+      var topTrack = tracks[topIndex];
+      var topValue = acceptanceRate[topIndex]*100;
 
       return {
         msg: 'Submission Info Analysis',
@@ -406,19 +412,19 @@ export default {
         JCDLAnnotation: this.computeJCDLDeadlineData(),
         timeSeriesChartIncluded: true,
         timeseriesText: {
-          val: "This is a sample text.",
+          val: "It can be identified clearly from the chart that most researchers won't submit their work until the last moment :-). Additionally, although some people made changes to their work after the first submission, the vast majority of people create the entry and make it the final version, since the red curve and blue curve overlaps in most of the time.",
           edit: false
         },
         historicalAcceptanceText: {
-          val: "This is a sample text.",
+          val: "The historical data on the acceptance rate of JCDL can be found here, appending this year's data in the end. You might notice that for full papers, the rate has seen a major increase from earlier works, while there have been some fluctuations for short papers.",
           edit: false
         },
         acceptanceRateByTrackText: {
-          val: "This is a sample text.",
+          val: "Then for this year's work, we can divide them into different tracks to examine the details: the track " + String(topTrack) + " has the largest acceptance rate, at around " + String(topValue.toFixed(2)) + "%. Noticeably, Doctoral Consortium and Tutorials didn't take in any entries this year.",
           edit: false
         },
         topAcceptedAuthorsText: {
-          val: "This is a sample text.",
+          val: "As for the authors, congratulations to Prof. " + String(this.chartData.topAcceptedAuthors.names[0]) + " for getting " + String(this.chartData.topAcceptedAuthors.counts[0]) + " papers accepted to JCDL 2018.",
           edit: false
         },
         historicalAcceptanceChartIncluded: true,
@@ -766,6 +772,23 @@ export default {
       });
       return topWordCloud;
     },
+    indexOfMax: function(arr) {
+      if (arr.length === 0) {
+        return -1;
+      }
+
+      var max = arr[0];
+      var maxIndex = 0;
+
+      for (var i = 1; i < arr.length; i++) {
+        if (arr[i] > max) {
+          maxIndex = i;
+          max = arr[i];
+        }
+      }
+
+      return maxIndex;
+    },
     computeAcceptanceRateByTrack: function() {
       var tracks = this.getTrackInSubmission();
       var values = [];
@@ -869,7 +892,6 @@ export default {
             scaleID: "x-axis-0",
             value: "2018-01-18",
             borderDash: [4,4],
-            // borderDashOffset: 5,
             borderColor: "red",
             label: {
               content: "Papers, Tutorial, and Wordshop Deadline",
@@ -885,7 +907,6 @@ export default {
             scaleID: "x-axis-0",
             value: "2018-02-02",
             borderDash: [4,4],
-            // borderDashOffset: 5,
             borderColor: "red",
             label: {
               content: "Panel, Poster, and Demo Deadline",
