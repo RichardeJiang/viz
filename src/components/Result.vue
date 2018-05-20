@@ -206,7 +206,8 @@
         active-text="Included in Report"
         inactive-text="Not Included">
       </el-switch>
-      <bar-chart :data-input="scoreDistributionData" :title-text="'Score Distribution'" class="chart"></bar-chart>
+      <bar-chart :data-input="scoreDistributionData" :title-text="'Score Distribution'" class="chart" id="scorechart" ref="scorechart"></bar-chart>
+      <editable-text v-bind:text.sync="scoreDistributionText" style="margin-bottom: 20px;"></editable-text>
 
       <el-switch
         v-model="recommendDistributionChartIncluded"
@@ -214,7 +215,8 @@
         active-text="Included in Report"
         inactive-text="Not Included">
       </el-switch>
-      <bar-chart :data-input="recommendDistributionData" :title-text="'Recommendation Distribution'" class="chart"></bar-chart>
+      <bar-chart :data-input="recommendDistributionData" :title-text="'Recommendation Distribution'" class="chart" id="recommendchart" ref="recommendchart"></bar-chart>
+      <editable-text v-bind:text.sync="recommendDistributionText" style="margin-bottom: 20px;"></editable-text>
 
       <el-switch
         v-model="reviewTableIncluded"
@@ -222,25 +224,28 @@
         active-text="Included in Report"
         inactive-text="Not Included">
       </el-switch>
-      <h4>Word Cloud for Submissions by Track</h4>
       <p>
         The mean scores and mean confidence values can be found as follows:
-        <el-table
-          :data="reviewTableData"
-          stripe
-          style="width: 70%;margin-top:10px">
-          <el-table-column
-            prop="field"
-            label="Field"
-            width="180">
-          </el-table-column>
-          <el-table-column
-            prop="value"
-            label="Value"
-            width="180">
-          </el-table-column>
-        </el-table>
+        <div id="reviewtable" ref="reviewtable">
+          <el-table
+            :data="reviewTableData"
+            stripe
+            style="width: 70%;margin-top:10px;margin-bottom: 10px">
+            <el-table-column
+              prop="field"
+              label="Field"
+              width="180">
+            </el-table-column>
+            <el-table-column
+              prop="value"
+              label="Value"
+              width="180">
+            </el-table-column>
+          </el-table>
+        </div>
+        <editable-text v-bind:text.sync="reviewTableText"></editable-text>
       </p>
+      <el-button @click="saveReview" type="success" plain style="margin-top: 10px">Save</el-button>
     </div> <!--End of Review Component-->
 
 
@@ -443,6 +448,18 @@ export default {
         scoreDistributionChartIncluded: true,
         recommendDistributionChartIncluded: true,
         reviewTableIncluded: true,
+        scoreDistributionText: {
+          val: "This is a sample text.",
+          edit: false
+        },
+        recommendDistributionText: {
+          val: "This is a sample text.",
+          edit: false
+        },
+        reviewTableText: {
+          val: "This is a sample text.",
+          edit: false
+        }
       }
 
     } else { // dummy data input
@@ -574,9 +591,6 @@ export default {
           var historicalTextLines = doc.splitTextToSize(this.historicalAcceptanceText.val, (pdfInMM - leftMargin - rightMargin));
           doc.text(leftMargin, topMarginAfterTime + historicalCanvas.height / 8 + 10, historicalTextLines);
 
-          // var historicalLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * historicalTextLines.length;
-          // var topMarginAfterHistorical = topMarginAfterTime + historicalCanvas.height / 8 + historicalLinesHeight - 5;
-
           doc.addPage();
           var topMarginAfterHistorical = Const.pdfTopMargin;
 
@@ -613,6 +627,51 @@ export default {
       });
     },
     saveReview: function() {
+      let fileName = 'Review Visual Analysis';
+      var leftMargin = Const.pdfLeftMargin;
+      var rightMargin = Const.pdfRightMargin;
+      var pdfInMM = Const.pdfInMM;
+      var initialTopMargin = Const.pdfTopMargin;
+      var doc = new jsPDF("p", "mm", "a4");
+      var title = "Review Visual Analysis";
+      doc.setFont("Times");
+      doc.setFontSize(Const.pdfTitleFontSize);
+      var titleLength = doc.getStringUnitWidth(title) * Const.pdfTitleFontSize * Const.pdfMMPerPT;
+      doc.text((pdfInMM - leftMargin - rightMargin - titleLength) / 2.0 + leftMargin, initialTopMargin, title);
+      var startingTopMargin = initialTopMargin + Const.pdfTitleFontSize * Const.pdfMMPerPT;
+      doc.setFontSize(Const.pdfTextFontSize);
+
+      html2canvas(document.getElementById('scorechart')).then(scoreCanvas => {
+        var scoreImageData = scoreCanvas.toDataURL("image/png");
+        doc.addImage(scoreImageData, 'PNG', 15, startingTopMargin, scoreCanvas.width / 8, scoreCanvas.height / 8);
+
+        var scoreTextLines = doc.splitTextToSize(this.scoreDistributionText.val, (pdfInMM - leftMargin - rightMargin));
+        doc.text(leftMargin, startingTopMargin + scoreCanvas.height / 8 + 10, scoreTextLines);
+
+        var scoreTextHeight = Const.pdfLineHeight * Const.pdfTextFontSize * scoreTextLines.length;
+        var topMarginAfterScore = startingTopMargin + scoreCanvas.height / 8 + scoreTextHeight + 5;
+
+        html2canvas(document.getElementById('recommendchart')).then(recommendCanvas => {
+          var recommendImageData = recommendCanvas.toDataURL("image/png");
+          doc.addImage(recommendImageData, 'PNG', 15, topMarginAfterScore, recommendCanvas.width / 8, recommendCanvas.height / 8);
+
+          var recommendTextLines = doc.splitTextToSize(this.recommendDistributionText.val, (pdfInMM - leftMargin - rightMargin));
+          doc.text(leftMargin, topMarginAfterScore + recommendCanvas.height / 8 + 10, recommendTextLines);
+
+          doc.addPage();
+          var topMarginAfterRecommend = Const.pdfTopMargin;
+
+          html2canvas(document.getElementById('reviewtable')).then(tableCanvas => {
+            var tableImageData = tableCanvas.toDataURL("image/png");
+            doc.addImage(tableImageData, 'PNG', 30, topMarginAfterRecommend, tableCanvas.width / 10, tableCanvas.height / 10);
+
+            var tableTextLines = doc.splitTextToSize(this.reviewTableText.val, (pdfInMM - leftMargin - rightMargin));
+            doc.text(leftMargin, topMarginAfterRecommend + tableCanvas.height / 10 + 10, tableTextLines);
+
+            doc.save(fileName + '.pdf');
+          });
+        });
+      });
 
     },
     saveToPdf: function() {
