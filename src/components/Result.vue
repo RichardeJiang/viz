@@ -92,7 +92,7 @@
         active-text="Included in Report"
         inactive-text="Not Included">
       </el-switch>
-      <time-line-chart :data-input="timeSeriesData" :title-text="'Submission Time Series'" class="chart" id="timeserieschart" ref="timeserieschart"></time-line-chart>
+      <time-line-chart :data-input="timeSeriesData" :title-text="'Submission Time Series'" :annotation="JCDLAnnotation" class="chart" id="timeserieschart" ref="timeserieschart"></time-line-chart>
       <editable-text v-bind:text.sync="timeseriesText" style="margin-bottom: 20px;"></editable-text>
 
       <el-switch
@@ -403,6 +403,7 @@ export default {
         topAcceptedAuthorsDataLength: 3,
         historicalAcceptanceRate: this.computeHistoricalAcceptanceRate(),
         timeSeriesData: this.computeTimeSeriesData(),
+        JCDLAnnotation: this.computeJCDLDeadlineData(),
         timeSeriesChartIncluded: true,
         timeseriesText: {
           val: "This is a sample text.",
@@ -855,6 +856,44 @@ export default {
             // pointBorderColor: '#249EBF',
             radius: 0,
             borderColor: 'red'
+          }
+        ]
+      }
+    },
+    computeJCDLDeadlineData: function() {
+      return {
+        annotations: [
+          {
+            type: "line",
+            mode: "vertical",
+            scaleID: "x-axis-0",
+            value: "2018-01-18",
+            borderDash: [4,4],
+            // borderDashOffset: 5,
+            borderColor: "red",
+            label: {
+              content: "Papers, Tutorial, and Wordshop Deadline",
+              enabled: true,
+              position: "top",
+              xAdjust: 55,
+              yAdjust: 8,
+            }
+          }, 
+          {
+            type: "line",
+            mode: "vertical",
+            scaleID: "x-axis-0",
+            value: "2018-02-02",
+            borderDash: [4,4],
+            // borderDashOffset: 5,
+            borderColor: "red",
+            label: {
+              content: "Panel, Poster, and Demo Deadline",
+              enabled: true,
+              position: "top",
+              xAdjust: -35,
+              yAdjust: 45,
+            }
           }
         ]
       }
