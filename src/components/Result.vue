@@ -20,7 +20,7 @@
       <!-- <P>
         {{authorChartIncluded}}
       </p> -->
-      <bar-chart :data-input="topAuthorData" :title-text="'Top Authors'" class="chart" id="testpdf" ref="testpdf"></bar-chart>
+      <bar-chart :data-input="topAuthorData" :title-text="'Top Authors'" class="chart" id="topauthorchart" ref="topauthorchart"></bar-chart>
       <!--using text.sync for two-way data binding to editable text child component-->
       <editable-text v-bind:text.sync="authorText"></editable-text>
 
@@ -46,8 +46,10 @@
         active-text="Included in Report"
         inactive-text="Not Included">
       </el-switch>
-      <hori-bar-chart v-bind:data-input="topCountryData" :title-text="'Top Countries'" class="chart" v-if="countryChartType=='bar'"></hori-bar-chart>
-      <pie-chart v-bind:data-input="topCountryData" :title-text="'Top Countries'" class="chart" v-else-if="countryChartType=='pie'"></pie-chart>
+      <div id="topcountrychart" ref="topcountrychart">
+        <hori-bar-chart v-bind:data-input="topCountryData" :title-text="'Top Countries'" class="chart" v-if="countryChartType=='bar'"></hori-bar-chart>
+        <pie-chart v-bind:data-input="topCountryData" :title-text="'Top Countries'" class="chart" v-else-if="countryChartType=='pie'"></pie-chart>
+      </div>
       <editable-text v-bind:text.sync="countryText"></editable-text>
 
       <el-select v-model="affiliationChartType" placeholder="Select Chart" style="margin-top: 20px; margin-right: 10px">
@@ -72,11 +74,13 @@
         active-text="Included in Report"
         inactive-text="Not Included">
       </el-switch>
-      <hori-bar-chart :data-input="topAffiliationData" :title-text="'Top Affiliations'" class="chart" v-if="affiliationChartType=='bar'"></hori-bar-chart>
-      <pie-chart :data-input="topAffiliationData" :title-text="'Top Affiliations'" class="chart" v-else-if="affiliationChartType=='pie'"></pie-chart>
+      <div id="topaffiliationchart" ref="topaffiliationchart">
+        <hori-bar-chart :data-input="topAffiliationData" :title-text="'Top Affiliations'" class="chart" v-if="affiliationChartType=='bar'"></hori-bar-chart>
+        <pie-chart :data-input="topAffiliationData" :title-text="'Top Affiliations'" class="chart" v-else-if="affiliationChartType=='pie'"></pie-chart>
+      </div>
       <editable-text v-bind:text.sync="affiliationText"></editable-text>
 
-      <el-button @click="saveToPdf" type="success" plain style="margin-top: 10px">Save</el-button>
+      <el-button @click="saveAuthor" type="success" plain style="margin-top: 10px">Save</el-button>
 
     </div> <!--End of Author Component-->
 
@@ -458,6 +462,75 @@ export default {
 
   },
   methods: {
+    saveAuthor: function() {
+      let fileName = 'Author Submission Visual Analysis';
+      var leftMargin = Const.pdfLeftMargin;
+      var rightMargin = Const.pdfRightMargin;
+      var pdfInMM = Const.pdfInMM;
+      var initialTopMargin = Const.pdfTopMargin;
+      var doc = new jsPDF("p", "mm", "a4");
+      var title = "Author Submission Visual Analysis";
+      doc.setFont("Times");
+      doc.setFontSize(Const.pdfTitleFontSize);
+      var titleLength = doc.getStringUnitWidth(title) * Const.pdfTitleFontSize * Const.pdfMMPerPT;
+      doc.text((pdfInMM - leftMargin - rightMargin - titleLength) / 2.0 + leftMargin, initialTopMargin, title);
+      var startingTopMargin = initialTopMargin + Const.pdfTitleFontSize * Const.pdfMMPerPT;
+      doc.setFontSize(Const.pdfTextFontSize);
+      html2canvas(document.getElementById('topauthorchart')).then(authorCanvas => {
+        var authorImageData = authorCanvas.toDataURL("image/png");
+        doc.addImage(authorImageData, 'PNG', 15, startingTopMargin, authorCanvas.width / 8, authorCanvas.height / 8);
+
+        var authorTextLines = doc.splitTextToSize(this.authorText.val, (pdfInMM - leftMargin - rightMargin));
+        doc.text(leftMargin, startingTopMargin + authorCanvas.height / 8 + 10, authorTextLines);
+
+        // Note: here pdfLineHeight is the line height considering the white space between lines
+        var authorTextLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * authorTextLines.length;
+        var topMarginAfterAuthor = startingTopMargin + authorCanvas.height / 8 + authorTextLinesHeight - 5;
+
+        html2canvas(document.getElementById('topcountrychart')).then(countryCanvas => {
+          var countryImageData = countryCanvas.toDataURL("image/png");
+          doc.addImage(countryImageData, 'PNG', 15, topMarginAfterAuthor, countryCanvas.width / 8, countryCanvas.height / 8);
+
+          var countryTextLines = doc.splitTextToSize(this.countryText.val, (pdfInMM - leftMargin - rightMargin));
+          doc.text(leftMargin, topMarginAfterAuthor + countryCanvas.height / 8 + 10, countryTextLines);
+
+          var countryTextLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * countryTextLines.length;
+
+          doc.addPage();
+          var topMarginAfterCountry = Const.pdfTopMargin;
+
+          html2canvas(document.getElementById('topaffiliationchart')).then(affiliationCanvas => {
+            var affiliationImageData = affiliationCanvas.toDataURL("image/png");
+            doc.addImage(affiliationImageData, 'PNG', 15, topMarginAfterCountry, affiliationCanvas.width / 8, affiliationCanvas.height / 8);
+
+            var affiliationTextLines = doc.splitTextToSize(this.affiliationText.val, (pdfInMM - leftMargin - rightMargin));
+            doc.text(leftMargin, topMarginAfterCountry + affiliationCanvas.height / 8 + 10, affiliationTextLines);
+
+            doc.save(fileName + '.pdf');
+          });
+
+        });
+
+      });
+    },
+    saveSubmission: function() {
+      let fileName = 'Submission Visual Analysis';
+      var leftMargin = Const.pdfLeftMargin;
+      var rightMargin = Const.pdfRightMargin;
+      var pdfInMM = Const.pdfInMM;
+      var initialTopMargin = Const.pdfTopMargin;
+      var doc = new jsPDF("p", "mm", "a4");
+      var title = "Submission Visual Analysis";
+      doc.setFont("Times");
+      doc.setFontSize(Const.pdfTitleFontSize);
+      var titleLength = doc.getStringUnitWidth(title) * Const.pdfTitleFontSize * Const.pdfMMPerPT;
+      doc.text((pdfInMM - leftMargin - rightMargin - titleLength) / 2.0 + leftMargin, initialTopMargin, title);
+      var startingTopMargin = initialTopMargin + Const.pdfTitleFontSize * Const.pdfMMPerPT;
+      doc.setFontSize(Const.pdfTextFontSize);
+    },
+    saveReview: function() {
+
+    },
     saveToPdf: function() {
       let fileName = 'Visual Analysis';
       var leftMargin = 15;
@@ -473,19 +546,6 @@ export default {
 
         doc.save(fileName + '.pdf');
       });
-      // html2canvas(dom, {
-      //   onrendered: function(canvas) {
-      //     var image = new Image();
-      //     image.src = canvas.toDataURL();
-      //     document.getElementById()
-      //   }
-      // });
-      // html2canvas(document.querySelector('testpdf')).then(canvas => {
-      //   var imageData = canvas.toDataURL("image/png");
-      //   doc.addImage(imageData, 'PNG');
-      //   doc.save(fileName + '.pdf');
-      // });
-      // doc.save(fileName + ".pdf");
     },
     chooseColorScheme: function(len) {
       switch (len) {
