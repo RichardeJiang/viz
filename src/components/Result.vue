@@ -92,7 +92,8 @@
         active-text="Included in Report"
         inactive-text="Not Included">
       </el-switch>
-      <time-line-chart :data-input="timeSeriesData" :title-text="'Submission Time Series'" class="chart"></time-line-chart>
+      <time-line-chart :data-input="timeSeriesData" :title-text="'Submission Time Series'" class="chart" id="timeserieschart" ref="timeserieschart"></time-line-chart>
+      <editable-text v-bind:text.sync="timeseriesText" style="margin-bottom: 20px;"></editable-text>
 
       <el-switch
         v-model="historicalAcceptanceChartIncluded"
@@ -100,7 +101,8 @@
         active-text="Included in Report"
         inactive-text="Not Included">
       </el-switch>
-      <line-chart :data-input="historicalAcceptanceRate" :title-text="'Past Years Acceptance Rates'" class="chart"></line-chart>
+      <line-chart :data-input="historicalAcceptanceRate" :title-text="'Past Years Acceptance Rates'" class="chart" id="historicalchart" ref="historicalchart"></line-chart>
+      <editable-text v-bind:text.sync="historicalAcceptanceText"></editable-text>
 
       <el-select v-model="acceptanceRateChartType" placeholder="Select Chart" style="margin-top: 20px; margin-right: 30px">
         <el-option
@@ -116,8 +118,11 @@
         active-text="Included in Report"
         inactive-text="Not Included">
       </el-switch>
-      <bar-chart-deci :data-input="acceptanceRateByTrackData" :title-text="'Acceptance Rate By Track'" class="chart" v-if="acceptanceRateChartType=='bar'"></bar-chart-deci>
-      <radar-chart :data-input="acceptanceRateByTrackData" :title-text="'Acceptance Rate By Track'" class="chart" v-else-if="acceptanceRateChartType=='radar'"></radar-chart>
+      <div id="acceptancechart" ref="acceptancechart">
+        <bar-chart-deci :data-input="acceptanceRateByTrackData" :title-text="'Acceptance Rate By Track'" class="chart" v-if="acceptanceRateChartType=='bar'"></bar-chart-deci>
+        <radar-chart :data-input="acceptanceRateByTrackData" :title-text="'Acceptance Rate By Track'" class="chart" v-else-if="acceptanceRateChartType=='radar'"></radar-chart>
+      </div>
+      <editable-text v-bind:text.sync="acceptanceRateByTrackText"></editable-text>
 
       <el-select v-model="topAcceptedAuthorsDataLength" placeholder="Select Length" style="margin-top: 20px;margin-right: 30px">
         <el-option
@@ -133,7 +138,8 @@
         active-text="Included in Report"
         inactive-text="Not Included">
       </el-switch>
-      <hori-bar-chart :data-input="topAcceptedAuthorsData" :title-text="'Top Accepted Authors'" class="chart"></hori-bar-chart>
+      <hori-bar-chart :data-input="topAcceptedAuthorsData" :title-text="'Top Accepted Authors'" class="chart" id="topacceptedauthorchart" ref="topacceptedauthorchart"></hori-bar-chart>
+      <editable-text v-bind:text.sync="topAcceptedAuthorsText" style="margin-bottom: 20px;"></editable-text>
 
       <!--Note: due to the constraint of the component, the style width and height must be specified-->
       <el-switch
@@ -142,12 +148,14 @@
         active-text="Included in Report"
         inactive-text="Not Included">
       </el-switch>
-      <h4>Word Cloud for All Submissions</h4>
-      <vue-word-cloud :words="wordCloudTotal" 
-                      :animationDuration="50" 
-                      :color="([, weight]) => weight > 10 ? 'Red' : weight > 5 ? 'Blue' : 'Black'"
-                      font-family="Roboto" 
-                      style="width: 70%;height: 200px"></vue-word-cloud>
+      <div id="wordcloudall" ref="wordcloudall">
+        <h4>Word Cloud for All Submissions</h4>
+        <vue-word-cloud :words="wordCloudTotal" 
+                        :animationDuration="50" 
+                        :color="([, weight]) => weight > 10 ? 'Red' : weight > 5 ? 'Blue' : 'Black'"
+                        font-family="Roboto" 
+                        style="width: 70%;height: 200px"></vue-word-cloud>
+      </div>
 
       <el-switch
         v-model="wordCloudAcceptedIncluded"
@@ -155,12 +163,14 @@
         active-text="Included in Report"
         inactive-text="Not Included">
       </el-switch>
-      <h4>Word Cloud for Accepted Papers</h4>
-      <vue-word-cloud :words="acceptedWordCloud" 
-                      :animationDuration="50" 
-                      :color="([, weight]) => weight > 10 ? 'Red' : weight > 5 ? 'Blue' : 'Black'"
-                      font-family="Roboto" 
-                      style="width: 70%;height: 200px"></vue-word-cloud>
+      <div id="wordcloudaccept" ref="wordcloudaccept">
+        <h4>Word Cloud for Accepted Papers</h4>
+        <vue-word-cloud :words="acceptedWordCloud" 
+                        :animationDuration="50" 
+                        :color="([, weight]) => weight > 10 ? 'Red' : weight > 5 ? 'Blue' : 'Black'"
+                        font-family="Roboto" 
+                        style="width: 70%;height: 200px"></vue-word-cloud>
+      </div>
 
       <el-switch
         v-model="wordCloudByTrackIncluded"
@@ -168,21 +178,23 @@
         active-text="Included in Report"
         inactive-text="Not Included">
       </el-switch>
-      <h4>Word Cloud for Submissions by Track</h4>
-      <el-select v-model="wordCloudSelectedTrack" placeholder="Select Length" style="margin-top: 10px;margin-right: 10px">
-        <el-option
-          v-for="item in trackOptions"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value">
-        </el-option>
-      </el-select>
-      <vue-word-cloud :words="wordCloudByTrack[wordCloudSelectedTrack]" 
-                      :animationDuration="100" 
-                      :color="([, weight]) => weight > 10 ? 'Red' : weight > 5 ? 'Blue' : 'Black'"
-                      font-family="Roboto" 
-                      style="width: 70%;height: 200px"></vue-word-cloud>
-      <el-button @click="saveToPdf" type="success" plain style="margin-top: 20px">Save</el-button>
+      <div id="wordcloudtrack" ref="wordcloudtrack">
+        <h4>Word Cloud for Submissions by Track</h4>
+        <el-select v-model="wordCloudSelectedTrack" placeholder="Select Length" style="margin-top: 10px;margin-right: 10px">
+          <el-option
+            v-for="item in trackOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <vue-word-cloud :words="wordCloudByTrack[wordCloudSelectedTrack]" 
+                        :animationDuration="100" 
+                        :color="([, weight]) => weight > 10 ? 'Red' : weight > 5 ? 'Blue' : 'Black'"
+                        font-family="Roboto" 
+                        style="width: 70%;height: 200px"></vue-word-cloud>
+      </div>
+      <el-button @click="saveSubmission" type="success" plain style="margin-top: 20px">Save</el-button>
 
     </div> <!--End of Submission Component-->
 
@@ -387,6 +399,22 @@ export default {
         historicalAcceptanceRate: this.computeHistoricalAcceptanceRate(),
         timeSeriesData: this.computeTimeSeriesData(),
         timeSeriesChartIncluded: true,
+        timeseriesText: {
+          val: "This is a sample text.",
+          edit: false
+        },
+        historicalAcceptanceText: {
+          val: "This is a sample text.",
+          edit: false
+        },
+        acceptanceRateByTrackText: {
+          val: "This is a sample text.",
+          edit: false
+        },
+        topAcceptedAuthorsText: {
+          val: "This is a sample text.",
+          edit: false
+        },
         historicalAcceptanceChartIncluded: true,
         acceptanceRateByTrackChartIncluded: true,
         topAcceptedAuthorsChartIncluded: true,
@@ -527,6 +555,62 @@ export default {
       doc.text((pdfInMM - leftMargin - rightMargin - titleLength) / 2.0 + leftMargin, initialTopMargin, title);
       var startingTopMargin = initialTopMargin + Const.pdfTitleFontSize * Const.pdfMMPerPT;
       doc.setFontSize(Const.pdfTextFontSize);
+
+      html2canvas(document.getElementById('timeserieschart')).then(timeCanvas => {
+        var timeImageData = timeCanvas.toDataURL("image/png");
+        doc.addImage(timeImageData, 'PNG', 15, startingTopMargin, timeCanvas.width / 8, timeCanvas.height / 8);
+
+        var timeTextLines = doc.splitTextToSize(this.timeseriesText.val, (pdfInMM - leftMargin - rightMargin));
+        doc.text(leftMargin, startingTopMargin + timeCanvas.height / 8 + 10, timeTextLines);
+
+        // Note: here pdfLineHeight is the line height considering the white space between lines
+        var timeTextLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * timeTextLines.length;
+        var topMarginAfterTime = startingTopMargin + timeCanvas.height / 8 + timeTextLinesHeight + 5;
+
+        html2canvas(document.getElementById('historicalchart')).then(historicalCanvas => {
+          var historicalImageData = historicalCanvas.toDataURL("image/png");
+          doc.addImage(historicalImageData, 'PNG', 15, topMarginAfterTime, historicalCanvas.width / 8, historicalCanvas.height / 8);
+
+          var historicalTextLines = doc.splitTextToSize(this.historicalAcceptanceText.val, (pdfInMM - leftMargin - rightMargin));
+          doc.text(leftMargin, topMarginAfterTime + historicalCanvas.height / 8 + 10, historicalTextLines);
+
+          // var historicalLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * historicalTextLines.length;
+          // var topMarginAfterHistorical = topMarginAfterTime + historicalCanvas.height / 8 + historicalLinesHeight - 5;
+
+          doc.addPage();
+          var topMarginAfterHistorical = Const.pdfTopMargin;
+
+          html2canvas(document.getElementById('acceptancechart')).then(acceptanceCanvas => {
+            var acceptImageData = acceptanceCanvas.toDataURL("image/png");
+            doc.addImage(acceptImageData, 'PNG', 15, topMarginAfterHistorical, acceptanceCanvas.width / 8, acceptanceCanvas.height / 8);
+
+            var acceptTextLines = doc.splitTextToSize(this.acceptanceRateByTrackText.val, (pdfInMM - leftMargin - rightMargin));
+            doc.text(leftMargin, topMarginAfterHistorical + acceptanceCanvas.height / 8 + 10, acceptTextLines);
+
+            var acceptanceLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * acceptTextLines.length;
+            var topMarginAfterAccept = topMarginAfterHistorical + acceptanceCanvas.height / 8 + acceptanceLinesHeight + 5;
+
+            html2canvas(document.getElementById('topacceptedauthorchart')).then(accAuthorCanvas => {
+              var accAuthorImageData = accAuthorCanvas.toDataURL("image/png");
+              doc.addImage(accAuthorImageData, 'PNG', 15, topMarginAfterAccept, accAuthorCanvas.width / 8, accAuthorCanvas.height / 8);
+
+              var topAccAuthorsTextLines = doc.splitTextToSize(this.topAcceptedAuthorsText.val, (pdfInMM - leftMargin - rightMargin));
+              doc.text(leftMargin, topMarginAfterAccept + accAuthorCanvas.height / 8 + 10, topAccAuthorsTextLines);
+
+              doc.addPage();
+              var topMarginAfterTopAccAuthors = Const.pdfTopMargin;
+
+              html2canvas(document.getElementById('wordcloudall')).then(wordAllCanvas => {
+                var wordAllImageData = wordAllCanvas.toDataURL("image/png");
+                doc.addImage(wordAllImageData, 'PNG', 15, topMarginAfterTopAccAuthors, wordAllCanvas.width / 8, wordAllCanvas.height / 8);
+
+                doc.save(fileName + '.pdf');
+              });
+            });
+
+          });
+        });
+      });
     },
     saveReview: function() {
 
