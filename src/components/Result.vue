@@ -3,6 +3,23 @@
     <h1>{{ msg }}</h1>
     <div v-if="infoType === 'author'"> <!--Start of Author Component-->
 
+      <el-select v-model="authorDataLength" placeholder="Select Length" style="margin-top: 10px;margin-right: 40px">
+        <el-option
+          v-for="item in dataLengthOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+      <el-switch
+        v-model="authorChartIncluded"
+        active-color="#13ce66"
+        active-text="Included in Report"
+        inactive-text="Not Included">
+      </el-switch>
+      <!-- <P>
+        {{authorChartIncluded}}
+      </p> -->
       <bar-chart :data-input="topAuthorData" :title-text="'Top Authors'" class="chart" id="testpdf" ref="testpdf"></bar-chart>
       <!--using text.sync for two-way data binding to editable text child component-->
       <editable-text v-bind:text.sync="authorText"></editable-text>
@@ -15,7 +32,7 @@
           :value="item.value">
         </el-option>
       </el-select>
-      <el-select v-model="countryDataLength" placeholder="Select Length" style="margin-top: 20px;margin-right: 10px">
+      <el-select v-model="countryDataLength" placeholder="Select Length" style="margin-top: 20px;margin-right: 30px">
         <el-option
           v-for="item in dataLengthOptions"
           :key="item.value"
@@ -23,6 +40,12 @@
           :value="item.value">
         </el-option>
       </el-select>
+      <el-switch
+        v-model="countryChartIncluded"
+        active-color="#13ce66"
+        active-text="Included in Report"
+        inactive-text="Not Included">
+      </el-switch>
       <hori-bar-chart v-bind:data-input="topCountryData" :title-text="'Top Countries'" class="chart" v-if="countryChartType=='bar'"></hori-bar-chart>
       <pie-chart v-bind:data-input="topCountryData" :title-text="'Top Countries'" class="chart" v-else-if="countryChartType=='pie'"></pie-chart>
       <editable-text v-bind:text.sync="countryText"></editable-text>
@@ -43,6 +66,12 @@
           :value="item.value">
         </el-option>
       </el-select>
+      <el-switch
+        v-model="affiliationChartIncluded"
+        active-color="#13ce66"
+        active-text="Included in Report"
+        inactive-text="Not Included">
+      </el-switch>
       <hori-bar-chart :data-input="topAffiliationData" :title-text="'Top Affiliations'" class="chart" v-if="affiliationChartType=='bar'"></hori-bar-chart>
       <pie-chart :data-input="topAffiliationData" :title-text="'Top Affiliations'" class="chart" v-else-if="affiliationChartType=='pie'"></pie-chart>
       <editable-text v-bind:text.sync="affiliationText"></editable-text>
@@ -53,10 +82,23 @@
 
 
     <div v-else-if="infoType === 'submission'"> <!--Start of Submission Component-->
+      <el-switch
+        v-model="timeSeriesChartIncluded"
+        active-color="#13ce66"
+        active-text="Included in Report"
+        inactive-text="Not Included">
+      </el-switch>
       <time-line-chart :data-input="timeSeriesData" :title-text="'Submission Time Series'" class="chart"></time-line-chart>
+
+      <el-switch
+        v-model="historicalAcceptanceChartIncluded"
+        active-color="#13ce66"
+        active-text="Included in Report"
+        inactive-text="Not Included">
+      </el-switch>
       <line-chart :data-input="historicalAcceptanceRate" :title-text="'Past Years Acceptance Rates'" class="chart"></line-chart>
 
-      <el-select v-model="acceptanceRateChartType" placeholder="Select Chart" style="margin-top: 20px; margin-right: 10px">
+      <el-select v-model="acceptanceRateChartType" placeholder="Select Chart" style="margin-top: 20px; margin-right: 30px">
         <el-option
           v-for="item in chartOptions"
           :key="item.value"
@@ -64,10 +106,16 @@
           :value="item.value">
         </el-option>
       </el-select>
+      <el-switch
+        v-model="acceptanceRateByTrackChartIncluded"
+        active-color="#13ce66"
+        active-text="Included in Report"
+        inactive-text="Not Included">
+      </el-switch>
       <bar-chart-deci :data-input="acceptanceRateByTrackData" :title-text="'Acceptance Rate By Track'" class="chart" v-if="acceptanceRateChartType=='bar'"></bar-chart-deci>
       <radar-chart :data-input="acceptanceRateByTrackData" :title-text="'Acceptance Rate By Track'" class="chart" v-else-if="acceptanceRateChartType=='radar'"></radar-chart>
 
-      <el-select v-model="topAcceptedAuthorsDataLength" placeholder="Select Length" style="margin-top: 20px;margin-right: 10px">
+      <el-select v-model="topAcceptedAuthorsDataLength" placeholder="Select Length" style="margin-top: 20px;margin-right: 30px">
         <el-option
           v-for="item in dataLengthOptions"
           :key="item.value"
@@ -75,13 +123,47 @@
           :value="item.value">
         </el-option>
       </el-select>
+      <el-switch
+        v-model="topAcceptedAuthorsChartIncluded"
+        active-color="#13ce66"
+        active-text="Included in Report"
+        inactive-text="Not Included">
+      </el-switch>
       <hori-bar-chart :data-input="topAcceptedAuthorsData" :title-text="'Top Accepted Authors'" class="chart"></hori-bar-chart>
 
       <!--Note: due to the constraint of the component, the style width and height must be specified-->
+      <el-switch
+        v-model="wordCloudAllIncluded"
+        active-color="#13ce66"
+        active-text="Included in Report"
+        inactive-text="Not Included">
+      </el-switch>
       <h4>Word Cloud for All Submissions</h4>
-      <vue-word-cloud :words="wordCloudTotal" :animationDuration="50" font-family="Roboto" style="width: 70%;height: 200px"></vue-word-cloud>
+      <vue-word-cloud :words="wordCloudTotal" 
+                      :animationDuration="50" 
+                      :color="([, weight]) => weight > 10 ? 'Red' : weight > 5 ? 'Blue' : 'Black'"
+                      font-family="Roboto" 
+                      style="width: 70%;height: 200px"></vue-word-cloud>
+
+      <el-switch
+        v-model="wordCloudAcceptedIncluded"
+        active-color="#13ce66"
+        active-text="Included in Report"
+        inactive-text="Not Included">
+      </el-switch>
       <h4>Word Cloud for Accepted Papers</h4>
-      <vue-word-cloud :words="acceptedWordCloud" :animationDuration="50" font-family="Roboto" style="width: 70%;height: 200px"></vue-word-cloud>
+      <vue-word-cloud :words="acceptedWordCloud" 
+                      :animationDuration="50" 
+                      :color="([, weight]) => weight > 10 ? 'Red' : weight > 5 ? 'Blue' : 'Black'"
+                      font-family="Roboto" 
+                      style="width: 70%;height: 200px"></vue-word-cloud>
+
+      <el-switch
+        v-model="wordCloudByTrackIncluded"
+        active-color="#13ce66"
+        active-text="Included in Report"
+        inactive-text="Not Included">
+      </el-switch>
       <h4>Word Cloud for Submissions by Track</h4>
       <el-select v-model="wordCloudSelectedTrack" placeholder="Select Length" style="margin-top: 10px;margin-right: 10px">
         <el-option
@@ -91,19 +173,45 @@
           :value="item.value">
         </el-option>
       </el-select>
-      <vue-word-cloud :words="wordCloudByTrack[wordCloudSelectedTrack]" :animationDuration="100" font-family="Roboto" style="width: 70%;height: 200px"></vue-word-cloud>
+      <vue-word-cloud :words="wordCloudByTrack[wordCloudSelectedTrack]" 
+                      :animationDuration="100" 
+                      :color="([, weight]) => weight > 10 ? 'Red' : weight > 5 ? 'Blue' : 'Black'"
+                      font-family="Roboto" 
+                      style="width: 70%;height: 200px"></vue-word-cloud>
       <el-button @click="saveToPdf" type="success" plain style="margin-top: 20px">Save</el-button>
 
     </div> <!--End of Submission Component-->
 
 
     <div v-else-if="infoType === 'review'"> <!--Start of Review Component-->
+      <el-switch
+        v-model="scoreDistributionChartIncluded"
+        active-color="#13ce66"
+        active-text="Included in Report"
+        inactive-text="Not Included">
+      </el-switch>
       <bar-chart :data-input="scoreDistributionData" :title-text="'Score Distribution'" class="chart"></bar-chart>
+
+      <el-switch
+        v-model="recommendDistributionChartIncluded"
+        active-color="#13ce66"
+        active-text="Included in Report"
+        inactive-text="Not Included">
+      </el-switch>
       <bar-chart :data-input="recommendDistributionData" :title-text="'Recommendation Distribution'" class="chart"></bar-chart>
+
+      <el-switch
+        v-model="reviewTableIncluded"
+        active-color="#13ce66"
+        active-text="Included in Report"
+        inactive-text="Not Included">
+      </el-switch>
+      <h4>Word Cloud for Submissions by Track</h4>
       <p>
         The mean scores and mean confidence values can be found as follows:
         <el-table
           :data="reviewTableData"
+          stripe
           style="width: 70%;margin-top:10px">
           <el-table-column
             prop="field"
@@ -274,6 +382,13 @@ export default {
         topAcceptedAuthorsDataLength: 3,
         historicalAcceptanceRate: this.computeHistoricalAcceptanceRate(),
         timeSeriesData: this.computeTimeSeriesData(),
+        timeSeriesChartIncluded: true,
+        historicalAcceptanceChartIncluded: true,
+        acceptanceRateByTrackChartIncluded: true,
+        topAcceptedAuthorsChartIncluded: true,
+        wordCloudAllIncluded: true,
+        wordCloudAcceptedIncluded: true,
+        wordCloudByTrackIncluded: true,
       }
 
     } else if (this.infoType == 'review') {
@@ -293,6 +408,9 @@ export default {
             value: this.chartData.meanConfidence.toFixed(2)
           }
         ],
+        scoreDistributionChartIncluded: true,
+        recommendDistributionChartIncluded: true,
+        reviewTableIncluded: true,
       }
 
     } else { // dummy data input
@@ -540,13 +658,14 @@ export default {
     },
     computeScoreDistributionData: function(type) {
       // Type: "score" or "recommend"
-      var label = type == "score"? 'Average Score':'Average Recommendation';
+      var label = type == "score"? 'Score Counts':'Recommendation Counts';
       var rawData = type == "score"? this.chartData.scoreDistribution:this.chartData.recommendDistribution;
       return {
         labels: rawData.labels,
         datasets: [{
           label: label,
           data: rawData.counts,
+          backgroundColor: 'rgba(52, 152, 219, 0.4)',
           pointBackgroundColor: 'white',
           borderWidth: 1,
           pointBorderColor: '#249EBF',
