@@ -470,6 +470,15 @@ export default {
       }
 
     } else if (this.infoType == 'review') {
+      var scoreRanges = this.computeScoreDistributionData("score").labels;
+      var scoreCounts = this.computeScoreDistributionData("score").datasets[0].data;
+
+      var topIndex = this.indexOfMax(scoreCounts);
+      var topRange = scoreRanges[topIndex];
+
+      var recommendCounts = this.computeScoreDistributionData("recommend").datasets[0].data;
+      var firstEntryPercentage = recommendCounts[0] / recommendCounts.reduce(function(a, b) {return a+b;}) * 100;
+
       return {
         msg: 'Review Info Analysis',
         scoreDistributionData: this.computeScoreDistributionData("score"),
@@ -490,15 +499,15 @@ export default {
         recommendDistributionChartIncluded: true,
         reviewTableIncluded: true,
         scoreDistributionText: {
-          val: "This is a sample text.",
+          val: "Note that when considering the review scores, we are combining multiple entries at the same time: here for the overall score of each paper, we take all reviews for a particular paper, retrieve its overall score and the reviewer's confidence, then calculate the weighted average of the scores w.r.t. the confidence value, and then here it is. It's rather clear that the score range with the largest count is " + String(topRange) + " (a relatively low score though, :-)).",
           edit: false
         },
         recommendDistributionText: {
-          val: "This is a sample text.",
+          val: "The same logic applies to the recommendation scores. Note that we use 0 to represent 'not recommended for best paper', and 1 as 'recommended for best paper', and then do a weighted average using the confidence value. It's hence also clear that the 0's takes up " + String(firstEntryPercentage.toFixed(2)) + "%.",
           edit: false
         },
         reviewTableText: {
-          val: "This is a sample text.",
+          val: "The mean score and recommendation values can be found here, and you are free to add in any additional comments and remarks here.",
           edit: false
         }
       }
@@ -789,7 +798,7 @@ export default {
           doc.text(leftMargin, startingTopMargin + scoreCanvas.height / 8 + 10, scoreTextLines);
 
           var scoreTextHeight = Const.pdfLineHeight * Const.pdfTextFontSize * scoreTextLines.length;
-          var topMarginAfterScore = startingTopMargin + scoreCanvas.height / 8 + scoreTextHeight + 5;
+          var topMarginAfterScore = startingTopMargin + scoreCanvas.height / 8 + scoreTextHeight - 35;
 
         }
 
@@ -805,7 +814,7 @@ export default {
 
             if (numOfAddedSections % 2 == 1) {
               var recommendTextLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * recommendTextLines.length;
-              topMarginAfterRecommend = topMarginAfterScore + recommendCanvas.height / 8 + recommendTextLinesHeight + 5;
+              topMarginAfterRecommend = topMarginAfterScore + recommendCanvas.height / 8 + recommendTextLinesHeight - 20;
             }
           }
 
