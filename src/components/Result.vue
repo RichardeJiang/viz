@@ -562,35 +562,82 @@ export default {
       doc.text((pdfInMM - leftMargin - rightMargin - titleLength) / 2.0 + leftMargin, initialTopMargin, title);
       var startingTopMargin = initialTopMargin + Const.pdfTitleFontSize * Const.pdfMMPerPT;
       doc.setFontSize(Const.pdfTextFontSize);
+
+      // Attn: For the current impl, the logic is as follows:
+      // 1. each page of the PDF file will contain 2 images, together with their texts
+      // 2. hence, we use this numOfAddedSections to keep track of how many we have added to PDF
+      // 3. so if numOfAddedSections % 2 == 1, then no need to addPage(); else if num > 0, then addPage() and reset topMargin
+      var numOfAddedSections = 0;
+
       html2canvas(document.getElementById('topauthorchart')).then(authorCanvas => {
-        var authorImageData = authorCanvas.toDataURL("image/png");
-        doc.addImage(authorImageData, 'PNG', 15, startingTopMargin, authorCanvas.width / 8, authorCanvas.height / 8);
+        var topMarginAfterAuthor = startingTopMargin;
+        if (this.authorChartIncluded) {
+          numOfAddedSections += 1;
+          var authorImageData = authorCanvas.toDataURL("image/png");
+          doc.addImage(authorImageData, 'PNG', 15, startingTopMargin, authorCanvas.width / 8, authorCanvas.height / 8);
 
-        var authorTextLines = doc.splitTextToSize(this.authorText.val, (pdfInMM - leftMargin - rightMargin));
-        doc.text(leftMargin, startingTopMargin + authorCanvas.height / 8 + 10, authorTextLines);
+          var authorTextLines = doc.splitTextToSize(this.authorText.val, (pdfInMM - leftMargin - rightMargin));
+          doc.text(leftMargin, startingTopMargin + authorCanvas.height / 8 + 10, authorTextLines);
 
-        // Note: here pdfLineHeight is the line height considering the white space between lines
-        var authorTextLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * authorTextLines.length;
-        var topMarginAfterAuthor = startingTopMargin + authorCanvas.height / 8 + authorTextLinesHeight - 5;
+          // Note: here pdfLineHeight is the line height considering the white space between lines
+          var authorTextLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * authorTextLines.length;
+          topMarginAfterAuthor = startingTopMargin + authorCanvas.height / 8 + authorTextLinesHeight - 5;
+        }
+        // var authorImageData = authorCanvas.toDataURL("image/png");
+        // doc.addImage(authorImageData, 'PNG', 15, startingTopMargin, authorCanvas.width / 8, authorCanvas.height / 8);
+
+        // var authorTextLines = doc.splitTextToSize(this.authorText.val, (pdfInMM - leftMargin - rightMargin));
+        // doc.text(leftMargin, startingTopMargin + authorCanvas.height / 8 + 10, authorTextLines);
+
+        // // Note: here pdfLineHeight is the line height considering the white space between lines
+        // var authorTextLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * authorTextLines.length;
+        // var topMarginAfterAuthor = startingTopMargin + authorCanvas.height / 8 + authorTextLinesHeight - 5;
 
         html2canvas(document.getElementById('topcountrychart')).then(countryCanvas => {
-          var countryImageData = countryCanvas.toDataURL("image/png");
-          doc.addImage(countryImageData, 'PNG', 15, topMarginAfterAuthor, countryCanvas.width / 8, countryCanvas.height / 8);
+          var topMarginAfterCountry = topMarginAfterAuthor;
+          if (this.countryChartIncluded) {
+            numOfAddedSections += 1;
+            var countryImageData = countryCanvas.toDataURL("image/png");
+            doc.addImage(countryImageData, 'PNG', 15, topMarginAfterAuthor, countryCanvas.width / 8, countryCanvas.height / 8);
 
-          var countryTextLines = doc.splitTextToSize(this.countryText.val, (pdfInMM - leftMargin - rightMargin));
-          doc.text(leftMargin, topMarginAfterAuthor + countryCanvas.height / 8 + 10, countryTextLines);
+            var countryTextLines = doc.splitTextToSize(this.countryText.val, (pdfInMM - leftMargin - rightMargin));
+            doc.text(leftMargin, topMarginAfterAuthor + countryCanvas.height / 8 + 10, countryTextLines);
 
-          var countryTextLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * countryTextLines.length;
+            if (numOfAddedSections % 2 == 1) {
+              var countryTextLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * countryTextLines.length;
+              topMarginAfterCountry = topMarginAfterAuthor + countryCanvas.height / 8 + countryTextLinesHeight - 5;
 
-          doc.addPage();
-          var topMarginAfterCountry = Const.pdfTopMargin;
+            }
+
+          }
+          // var countryImageData = countryCanvas.toDataURL("image/png");
+          // doc.addImage(countryImageData, 'PNG', 15, topMarginAfterAuthor, countryCanvas.width / 8, countryCanvas.height / 8);
+
+          // var countryTextLines = doc.splitTextToSize(this.countryText.val, (pdfInMM - leftMargin - rightMargin));
+          // doc.text(leftMargin, topMarginAfterAuthor + countryCanvas.height / 8 + 10, countryTextLines);
+
+          // var countryTextLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * countryTextLines.length;
+
+          // doc.addPage();
+          // var topMarginAfterCountry = Const.pdfTopMargin;
 
           html2canvas(document.getElementById('topaffiliationchart')).then(affiliationCanvas => {
-            var affiliationImageData = affiliationCanvas.toDataURL("image/png");
-            doc.addImage(affiliationImageData, 'PNG', 15, topMarginAfterCountry, affiliationCanvas.width / 8, affiliationCanvas.height / 8);
+            if (this.affiliationChartIncluded) {
+              if (numOfAddedSections % 2 == 0 && numOfAddedSections > 0) {
+                doc.addPage();
+                topMarginAfterCountry = Const.pdfTopMargin;
+              }
+              var affiliationImageData = affiliationCanvas.toDataURL("image/png");
+              doc.addImage(affiliationImageData, 'PNG', 15, topMarginAfterCountry, affiliationCanvas.width / 8, affiliationCanvas.height / 8);
 
-            var affiliationTextLines = doc.splitTextToSize(this.affiliationText.val, (pdfInMM - leftMargin - rightMargin));
-            doc.text(leftMargin, topMarginAfterCountry + affiliationCanvas.height / 8 + 10, affiliationTextLines);
+              var affiliationTextLines = doc.splitTextToSize(this.affiliationText.val, (pdfInMM - leftMargin - rightMargin));
+              doc.text(leftMargin, topMarginAfterCountry + affiliationCanvas.height / 8 + 10, affiliationTextLines);
+            } 
+            // var affiliationImageData = affiliationCanvas.toDataURL("image/png");
+            // doc.addImage(affiliationImageData, 'PNG', 15, topMarginAfterCountry, affiliationCanvas.width / 8, affiliationCanvas.height / 8);
+
+            // var affiliationTextLines = doc.splitTextToSize(this.affiliationText.val, (pdfInMM - leftMargin - rightMargin));
+            // doc.text(leftMargin, topMarginAfterCountry + affiliationCanvas.height / 8 + 10, affiliationTextLines);
 
             doc.save(fileName + '.pdf');
           });
@@ -655,12 +702,25 @@ export default {
               doc.addPage();
               var topMarginAfterTopAccAuthors = Const.pdfTopMargin;
 
-              html2canvas(document.getElementById('wordcloudall')).then(wordAllCanvas => {
-                var wordAllImageData = wordAllCanvas.toDataURL("image/png");
-                doc.addImage(wordAllImageData, 'PNG', 15, topMarginAfterTopAccAuthors, wordAllCanvas.width / 8, wordAllCanvas.height / 8);
+              html2canvas(document.getElementById('topacceptedauthorbytrackchart')).then(accAuthorTrackCanvas => {
+                var accAuthorTrackImageData = accAuthorTrackCanvas.toDataURL("image/png");
+                doc.addImage(accAuthorTrackImageData, 'PNG', 15, topMarginAfterTopAccAuthors, accAuthorTrackCanvas.width / 8, accAuthorTrackCanvas.height / 8);
 
-                doc.save(fileName + '.pdf');
+                var topAccAuthorsTrackTextLines = doc.splitTextToSize(this.topAcceptedAuthorsByTrackText.val, (pdfInMM - leftMargin - rightMargin));
+                doc.text(leftMargin, topMarginAfterTopAccAuthors + accAuthorTrackCanvas.height / 8 + 5, topAccAuthorsTrackTextLines);
+
+                var topAccAuthorsTrackLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * topAccAuthorsTrackTextLines.length;
+                var topMarginAfterTopAccAuthorsTrack = topMarginAfterTopAccAuthors + accAuthorTrackCanvas.height / 8 + topAccAuthorsTrackLinesHeight;
+
+                html2canvas(document.getElementById('wordcloudall')).then(wordAllCanvas => {
+                  var wordAllImageData = wordAllCanvas.toDataURL("image/png");
+                  doc.addImage(wordAllImageData, 'PNG', 15, topMarginAfterTopAccAuthorsTrack, wordAllCanvas.width / 8, wordAllCanvas.height / 8);
+
+                  doc.save(fileName + '.pdf');
+                });
+
               });
+  
             });
 
           });
