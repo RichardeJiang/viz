@@ -138,8 +138,33 @@
         active-text="Included in Report"
         inactive-text="Not Included">
       </el-switch>
-      <hori-bar-chart :data-input="topAcceptedAuthorsData" :title-text="'Top Accepted Authors'" class="chart" id="topacceptedauthorchart" ref="topacceptedauthorchart"></hori-bar-chart>
+      <hori-bar-chart :data-input="topAcceptedAuthorsData" :title-text="'Top Accepted Authors/Contributors'" class="chart" id="topacceptedauthorchart" ref="topacceptedauthorchart"></hori-bar-chart>
       <editable-text v-bind:text.sync="topAcceptedAuthorsText" style="margin-bottom: 20px;"></editable-text>
+
+      <el-select v-model="topAcceptedAuthorsByTrackLength" placeholder="Select Length" style="margin-top: 20px;margin-right: 10px">
+        <el-option
+          v-for="item in dataLengthOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+      <el-select v-model="topAcceptedAuthorsSelectedTrack" placeholder="Select Length" style="margin-top: 10px;margin-right: 30px">
+        <el-option
+          v-for="item in trackOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+      <el-switch
+        v-model="topAcceptedAuthorsByTrackChartIncluded"
+        active-color="#13ce66"
+        active-text="Included in Report"
+        inactive-text="Not Included">
+      </el-switch>
+      <hori-bar-chart :data-input="topAcceptedAuthorsByTrackData" :title-text="'Top Accepted Authors'" class="chart" id="topacceptedauthorbytrackchart" ref="topacceptedauthorbytrackchart"></hori-bar-chart>
+      <editable-text v-bind:text.sync="topAcceptedAuthorsByTrackText" style="margin-bottom: 20px;"></editable-text>
 
       <!--Note: due to the constraint of the component, the style width and height must be specified-->
       <el-switch
@@ -377,6 +402,7 @@ export default {
         msg: 'Submission Info Analysis',
         acceptanceRate: this.chartData.acceptanceRate.toFixed(2),
         acceptanceRateSelectedTrack: 'Full Papers',
+        topAcceptedAuthorsSelectedTrack: 'Full Papers',
         wordCloudSelectedTrack: 'Full Papers',
         trackOptions: this.getTrackInSubmission().map(function (track) {return {value: track, label: track};}),
         chartOptions: [
@@ -407,12 +433,16 @@ export default {
         acceptanceRateByTrackData: this.computeAcceptanceRateByTrack(),
         topAcceptedAuthorsData: this.computeTopAcceptedAuthors(3),
         topAcceptedAuthorsDataLength: 3,
+        topAcceptedAuthorsByTrackData: this.computeTopAcceptedAuthorsByTrack(3, 'Full Papers'),
+        topAcceptedAuthorsByTrackLength: 3,
+        topAcceptedAuthorsByTrackChartIncluded: true,
         historicalAcceptanceRate: this.computeHistoricalAcceptanceRate(),
         timeSeriesData: this.computeTimeSeriesData(),
         JCDLAnnotation: this.computeJCDLDeadlineData(),
         timeSeriesChartIncluded: true,
         timeseriesText: {
           val: "It can be identified clearly from the chart that most researchers won't submit their work until the last moment :-). Additionally, although some people made changes to their work after the first submission, the vast majority of people create the entry and make it the final version, since the red curve and blue curve overlaps in most of the time.",
+          // val: "This is a sample text.",
           edit: false
         },
         historicalAcceptanceText: {
@@ -424,7 +454,11 @@ export default {
           edit: false
         },
         topAcceptedAuthorsText: {
-          val: "As for the authors, congratulations to Prof. " + String(this.chartData.topAcceptedAuthors.names[0]) + " for getting " + String(this.chartData.topAcceptedAuthors.counts[0]) + " papers accepted to JCDL 2018.",
+          val: "As for the authors, congratulations to Prof. " + String(this.chartData.topAcceptedAuthors.names[0]) + " for getting " + String(this.chartData.topAcceptedAuthors.counts[0]) + " papers/projects accepted to JCDL 2018.",
+          edit: false
+        },
+        topAcceptedAuthorsByTrackText: {
+          val: "You may want to dig into different tracks of submissions, and here you can check out the researchers who contribute the most to the selected track.",
           edit: false
         },
         historicalAcceptanceChartIncluded: true,
@@ -585,18 +619,18 @@ export default {
         doc.addImage(timeImageData, 'PNG', 15, startingTopMargin, timeCanvas.width / 8, timeCanvas.height / 8);
 
         var timeTextLines = doc.splitTextToSize(this.timeseriesText.val, (pdfInMM - leftMargin - rightMargin));
-        doc.text(leftMargin, startingTopMargin + timeCanvas.height / 8 + 10, timeTextLines);
+        doc.text(leftMargin, startingTopMargin + timeCanvas.height / 8 + 5, timeTextLines);
 
         // Note: here pdfLineHeight is the line height considering the white space between lines
         var timeTextLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * timeTextLines.length;
-        var topMarginAfterTime = startingTopMargin + timeCanvas.height / 8 + timeTextLinesHeight + 5;
+        var topMarginAfterTime = startingTopMargin + timeCanvas.height / 8 + timeTextLinesHeight - 25;
 
         html2canvas(document.getElementById('historicalchart')).then(historicalCanvas => {
           var historicalImageData = historicalCanvas.toDataURL("image/png");
           doc.addImage(historicalImageData, 'PNG', 15, topMarginAfterTime, historicalCanvas.width / 8, historicalCanvas.height / 8);
 
           var historicalTextLines = doc.splitTextToSize(this.historicalAcceptanceText.val, (pdfInMM - leftMargin - rightMargin));
-          doc.text(leftMargin, topMarginAfterTime + historicalCanvas.height / 8 + 10, historicalTextLines);
+          doc.text(leftMargin, topMarginAfterTime + historicalCanvas.height / 8 + 5, historicalTextLines);
 
           doc.addPage();
           var topMarginAfterHistorical = Const.pdfTopMargin;
@@ -606,17 +640,17 @@ export default {
             doc.addImage(acceptImageData, 'PNG', 15, topMarginAfterHistorical, acceptanceCanvas.width / 8, acceptanceCanvas.height / 8);
 
             var acceptTextLines = doc.splitTextToSize(this.acceptanceRateByTrackText.val, (pdfInMM - leftMargin - rightMargin));
-            doc.text(leftMargin, topMarginAfterHistorical + acceptanceCanvas.height / 8 + 10, acceptTextLines);
+            doc.text(leftMargin, topMarginAfterHistorical + acceptanceCanvas.height / 8 + 5, acceptTextLines);
 
             var acceptanceLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * acceptTextLines.length;
-            var topMarginAfterAccept = topMarginAfterHistorical + acceptanceCanvas.height / 8 + acceptanceLinesHeight + 5;
+            var topMarginAfterAccept = topMarginAfterHistorical + acceptanceCanvas.height / 8 + acceptanceLinesHeight - 20;
 
             html2canvas(document.getElementById('topacceptedauthorchart')).then(accAuthorCanvas => {
               var accAuthorImageData = accAuthorCanvas.toDataURL("image/png");
               doc.addImage(accAuthorImageData, 'PNG', 15, topMarginAfterAccept, accAuthorCanvas.width / 8, accAuthorCanvas.height / 8);
 
               var topAccAuthorsTextLines = doc.splitTextToSize(this.topAcceptedAuthorsText.val, (pdfInMM - leftMargin - rightMargin));
-              doc.text(leftMargin, topMarginAfterAccept + accAuthorCanvas.height / 8 + 10, topAccAuthorsTextLines);
+              doc.text(leftMargin, topMarginAfterAccept + accAuthorCanvas.height / 8 + 5, topAccAuthorsTextLines);
 
               doc.addPage();
               var topMarginAfterTopAccAuthors = Const.pdfTopMargin;
@@ -829,6 +863,26 @@ export default {
         ]
       }
     },
+    computeTopAcceptedAuthorsByTrack: function(len, track) {
+      var authors = this.chartData.topAuthorsByTrack[track].names.slice(0, len);
+      var values = this.chartData.topAuthorsByTrack[track].counts.slice(0, len);
+      console.log(authors);
+      console.log(values);
+      var scheme = this.chooseColorScheme(len);
+      return {
+        labels: authors,
+        datasets: [
+          {
+            label: 'Paper Counts',
+            backgroundColor: scheme,
+            pointBackgroundColor: 'white',
+            borderWidth: 1,
+            pointBorderColor: '#249EBF',
+            data: values,
+          }
+        ]
+      }
+    },
     computeHistoricalAcceptanceRate: function() {
       var years = this.chartData.comparableAcceptanceRate.year;
       console.log("got to the acceptance rate function");
@@ -968,6 +1022,13 @@ export default {
     topAcceptedAuthorsDataLength: function(newValue, oldValue) {
       var len = newValue;
       this.topAcceptedAuthorsData = this.computeTopAcceptedAuthors(len);
+    },
+    topAcceptedAuthorsSelectedTrack: function(newValue, oldValue) {
+      this.topAcceptedAuthorsByTrackData = this.computeTopAcceptedAuthorsByTrack(this.topAcceptedAuthorsByTrackLength, newValue);
+    },
+    topAcceptedAuthorsByTrackLength: function(newValue, oldValue) {
+      var len = newValue;
+      this.topAcceptedAuthorsByTrackData = this.computeTopAcceptedAuthorsByTrack(len, this.topAcceptedAuthorsSelectedTrack);
     }
   },
   components: {
