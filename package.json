@@ -10,7 +10,7 @@
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
     "build": "node build/build.js",
-    "start": "node server.js",
+    "start": "node server.js"
   },
   "dependencies": {
     "ajv": "^6.4.0",
