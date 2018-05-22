@@ -13,7 +13,10 @@ module.exports = {
     proxyTable: {
         '/upload/': {
             // target: 'http://localhost:8000/upload',
-            target: 'http://127.0.0.1:8000',
+
+            // This is in use!
+            // target: 'http://127.0.0.1:8000',
+            target: 'http://chairviz.herokuapp.com',
             changeOrigin: true,
             secure: false,
             // pathRewrite:{
@@ -23,6 +26,7 @@ module.exports = {
     },
 
     // Various Dev Server settings
+    // host: 'http://chairviz.herokuapp.com',
     host: 'localhost', // can be overwritten by process.env.HOST
     port: 8080, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
     autoOpenBrowser: false,

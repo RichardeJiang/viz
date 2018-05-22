@@ -1043,6 +1043,7 @@ export default {
           {
             label: 'Submit Time',
             data: this.chartData.timeSeries,
+            backgroundColor: 'white',
             fill: false,
             // pointBorderColor: '#249EBF',
             radius: 0,
@@ -1051,6 +1052,7 @@ export default {
           {
             label: 'Last Edit Time',
             data: this.chartData.lastEditSeries,
+            backgroundColor: 'white',
             fill: false,
             // pointBorderColor: '#249EBF',
             radius: 0,
