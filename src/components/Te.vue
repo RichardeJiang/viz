@@ -4,7 +4,7 @@
 
 <style>
 .echarts {
-  height: 350px;
+  height: 450px;
 }
 </style>
 
@@ -14,15 +14,16 @@ export default {
     let data = []
 
     for (let i = 0; i <= 360; i++) {
-      let t = i / 180 * Math.PI
-      let r = Math.sin(2 * t) * Math.cos(2 * t)
+      let t = i / 180 * Math.PI + Math.PI
+      var r = Math.sin(t) * Math.sqrt(Math.abs(Math.cos(t))) / (Math.sin(t) + 7.0 / 5) - 2 * Math.sin(t) + 2
       data.push([r, i])
     }
 
     return {
       polar: {
         title: {
-          text: 'axis'
+          text: 'Test Polar Axis',
+          show: true
         },
         legend: {
           data: ['line']
@@ -52,7 +53,7 @@ export default {
             data: data
           }
         ],
-        animationDuration: 2000
+        animationDuration: 1000
       }
     }
   }

@@ -1,9 +1,10 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import HelloWorld from '@/components/HelloWorld'
-import EC from '@/components/EC'
+// import EC from '@/components/EC'
 import Chart from '@/components/Chart'
 import Result from '@/components/Result'
+import TE from '@/components/Te'
 
 Vue.use(Router)
 
@@ -15,10 +16,15 @@ export default new Router({
       component: HelloWorld,
       props: true
     },
+    // {
+    // 	path: '/ec',
+    // 	name: 'EC',
+    // 	component: EC
+    // },
     {
-    	path: '/ec',
-    	name: 'EC',
-    	component: EC
+      path: '/te',
+      name: 'TE',
+      component: TE
     },
     {
       path: '/chart',

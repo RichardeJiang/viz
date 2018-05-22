@@ -12,8 +12,11 @@
       <!--router-link to="/chart" :chartData="testChartsDataInput">
         <el-button type="selection">Chart</el-button>
       </router-link-->
-      <router-link to="/ec">
+      <!--router-link to="/ec">
         <el-button type="success">EC</el-button>
+      </router-link-->
+      <router-link to="/te">
+        <el-button type="success">WY</el-button>
       </router-link>
 
       <center id="upload">
