@@ -123,21 +123,32 @@ export default {
           var infoType = x.infoType;
           var infoData = x.infoData;
 
+          var nameArray = document.querySelector('.input-file').value.split("\\");
+          var inputFileName = nameArray[nameArray.length - 1];
+
           // Note: use router.push to navigate through diff pages programmatically
           router.push({
             name: 'Result',
             params: {
+              inputFileName: inputFileName,
               chartData: infoData,
               infoType: infoType
             }
           });
+
+          // Note: adding the below code to make sure that reuploading the same file will give you sth
+          // Can consider changing this and the same code in catch block to finally();
+          document.querySelector('.input-file').value = '';
         })
         .catch(err => {
           this.uploadError = err.response;
           this.currentStatus = STATUS_FAILED;
+          document.querySelector('.input-file').value = '';
         });
     },
     filesChange(fieldName, fileList) {
+
+      console.log(document.querySelector('.input-file').value.split("\\"));
       // handle file changes
       const formData = new FormData();
 

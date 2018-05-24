@@ -302,7 +302,7 @@ import html2canvas from 'html2canvas'
 
 export default {
   name: 'Chart',
-  props: ['chartData', 'infoType'],
+  props: ['chartData', 'infoType', 'inputFileName'],
   data: function () {
     if (this.infoType == 'author') { // author.csv input
 

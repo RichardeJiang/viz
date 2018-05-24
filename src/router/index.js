@@ -33,7 +33,7 @@ export default new Router({
       props: true
     },
     {
-      path: '/result/:infoType',
+      path: '/result/:inputFileName',
       name: 'Result',
       component: Result,
       props: true

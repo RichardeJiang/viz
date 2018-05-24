@@ -11,12 +11,17 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
+        'http://chairviz.herokuapp.com/upload/': {
+            target: 'http://127.0.0.1:8000',
+            changeOrigin: true,
+            secure: false,
+        },
         '/upload/': {
             // target: 'http://localhost:8000/upload',
 
             // This is in use!
-            // target: 'http://127.0.0.1:8000',
-            target: 'http://chairviz.herokuapp.com',
+            target: 'http://127.0.0.1:8000',
+            // target: 'http://chairviz.herokuapp.com',
             changeOrigin: true,
             secure: false,
             // pathRewrite:{
