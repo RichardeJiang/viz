@@ -80,7 +80,7 @@
       </div>
       <editable-text v-bind:text.sync="affiliationText"></editable-text>
 
-      <el-button @click="saveAuthor" type="success" plain style="margin-top: 10px">Save</el-button>
+      <el-button @click="saveAuthorNew" type="success" plain style="margin-top: 10px">Save</el-button>
 
     </div> <!--End of Author Component-->
 
@@ -558,6 +558,7 @@ export default {
   },
   methods: {
     saveAuthor: function() {
+      // Still have this function as a reference for what has been done using the mm settings instead of pt
       let fileName = 'Author Submission Visual Analysis';
       var leftMargin = Const.pdfLeftMargin;
       var rightMargin = Const.pdfRightMargin;
@@ -630,19 +631,95 @@ export default {
 
       });
     },
+    saveAuthorNew: function() {
+      let fileName = 'Author Submission Visual Analysis';
+      var leftMargin = Const.leftMargin;
+      var rightMargin = Const.rightMargin;
+      var contentWidth = Const.contentWidth;
+      var initialTopMargin = Const.topMargin;
+      var doc = new jsPDF('p', 'pt');
+      var title = "Author Submission Visual Analysis";
+      doc.setFont("Times");
+      doc.setFontSize(Const.pdfTitleFontSize);
+      var titleLength = doc.getStringUnitWidth(title) * Const.pdfTitleFontSize;
+      doc.text((contentWidth - titleLength) / 2.0 + leftMargin, initialTopMargin, title);
+      var startingTopMargin = initialTopMargin + Const.pdfTitleFontSize;
+      doc.setFontSize(Const.pdfTextFontSize);
+
+      var numOfAddedSections = 0;
+
+      html2canvas(document.getElementById('topauthorchart')).then(authorCanvas => {
+        var topMarginAfterAuthor = startingTopMargin;
+        if (this.authorChartIncluded) {
+          numOfAddedSections += 1;
+          var authorImageData = authorCanvas.toDataURL("image/png");
+          var authorImageWidth = Const.imageWidth;
+          var authorImageHeight = authorCanvas.height * authorImageWidth / authorCanvas.width;
+          doc.addImage(authorImageData, 'PNG', leftMargin, startingTopMargin, authorImageWidth, authorImageHeight);
+
+          var authorTextLines = doc.splitTextToSize(this.authorText.val, contentWidth);
+          doc.text(leftMargin, startingTopMargin + authorImageHeight + 20, authorTextLines);
+
+          // Note: here pdfLineHeight is the line height considering the white space between lines
+          var authorTextLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * authorTextLines.length;
+          topMarginAfterAuthor = startingTopMargin + authorImageHeight + authorTextLinesHeight + 30;
+        }
+
+        html2canvas(document.getElementById('topcountrychart')).then(countryCanvas => {
+          var topMarginAfterCountry = topMarginAfterAuthor;
+          if (this.countryChartIncluded) {
+            numOfAddedSections += 1;
+            var countryImageData = countryCanvas.toDataURL("image/png");
+            var countryImageWidth =Const.imageWidth;
+            var countryImageHeight = countryCanvas.height * countryImageWidth / countryCanvas.width;
+            doc.addImage(countryImageData, 'PNG', leftMargin, topMarginAfterAuthor, countryImageWidth, countryImageHeight);
+
+            var countryTextLines = doc.splitTextToSize(this.countryText.val, contentWidth);
+            doc.text(leftMargin, topMarginAfterAuthor + countryImageHeight + 20, countryTextLines);
+
+            if (numOfAddedSections % 2 == 1) {
+              var countryTextLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * countryTextLines.length;
+              topMarginAfterCountry = topMarginAfterAuthor + countryImageHeight + countryTextLinesHeight + 20;
+
+            }
+          }
+
+          html2canvas(document.getElementById('topaffiliationchart')).then(affiliationCanvas => {
+            if (this.affiliationChartIncluded) {
+              if (numOfAddedSections % 2 == 0 && numOfAddedSections > 0) {
+                doc.addPage();
+                topMarginAfterCountry = Const.topMargin;
+              }
+              var affiliationImageData = affiliationCanvas.toDataURL("image/png");
+              var affiliationImageWidth = Const.imageWidth;
+              var affiliationImageHeight = affiliationCanvas.height * affiliationImageWidth / affiliationCanvas.width;
+              doc.addImage(affiliationImageData, 'PNG', leftMargin, topMarginAfterCountry, affiliationImageWidth, affiliationImageHeight);
+
+              var affiliationTextLines = doc.splitTextToSize(this.affiliationText.val, contentWidth);
+              doc.text(leftMargin, topMarginAfterCountry + affiliationImageHeight + 20, affiliationTextLines);
+            }
+
+            doc.save(fileName + '.pdf');
+          });
+
+        });
+
+      });
+
+    },
     saveSubmission: function() {
       let fileName = 'Submission Visual Analysis';
-      var leftMargin = Const.pdfLeftMargin;
-      var rightMargin = Const.pdfRightMargin;
-      var pdfInMM = Const.pdfInMM;
-      var initialTopMargin = Const.pdfTopMargin;
-      var doc = new jsPDF("p", "mm", "a4");
+      var leftMargin = Const.leftMargin;
+      var rightMargin = Const.rightMargin;
+      var initialTopMargin = Const.topMargin;
+      var contentWidth = Const.contentWidth;
+      var doc = new jsPDF("p", "pt");
       var title = "Submission Visual Analysis";
       doc.setFont("Times");
       doc.setFontSize(Const.pdfTitleFontSize);
-      var titleLength = doc.getStringUnitWidth(title) * Const.pdfTitleFontSize * Const.pdfMMPerPT;
-      doc.text((pdfInMM - leftMargin - rightMargin - titleLength) / 2.0 + leftMargin, initialTopMargin, title);
-      var startingTopMargin = initialTopMargin + Const.pdfTitleFontSize * Const.pdfMMPerPT;
+      var titleLength = doc.getStringUnitWidth(title) * Const.pdfTitleFontSize;
+      doc.text((contentWidth - titleLength) / 2.0 + leftMargin, initialTopMargin, title);
+      var startingTopMargin = initialTopMargin + Const.pdfTitleFontSize;
       doc.setFontSize(Const.pdfTextFontSize);
 
       var numOfAddedSections = 0;
@@ -653,14 +730,16 @@ export default {
           numOfAddedSections += 1;
 
           var timeImageData = timeCanvas.toDataURL("image/png");
-          doc.addImage(timeImageData, 'PNG', 15, startingTopMargin, timeCanvas.width / 8, timeCanvas.height / 8);
+          var timeImageWidth = Const.imageWidth;
+          var timeImageHeight = timeCanvas.height * timeImageWidth / timeCanvas.width;
+          doc.addImage(timeImageData, 'PNG', leftMargin, startingTopMargin, timeImageWidth, timeImageHeight);
 
-          var timeTextLines = doc.splitTextToSize(this.timeseriesText.val, (pdfInMM - leftMargin - rightMargin));
-          doc.text(leftMargin, startingTopMargin + timeCanvas.height / 8 + 5, timeTextLines);
+          var timeTextLines = doc.splitTextToSize(this.timeseriesText.val, contentWidth);
+          doc.text(leftMargin, startingTopMargin + timeImageHeight + 20, timeTextLines);
 
           // Note: here pdfLineHeight is the line height considering the white space between lines
           var timeTextLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * timeTextLines.length;
-          topMarginAfterTime = startingTopMargin + timeCanvas.height / 8 + timeTextLinesHeight - 25;
+          topMarginAfterTime = startingTopMargin + timeImageHeight + timeTextLinesHeight + 20;
 
         }
         
@@ -671,14 +750,16 @@ export default {
             numOfAddedSections += 1;
 
             var historicalImageData = historicalCanvas.toDataURL("image/png");
-            doc.addImage(historicalImageData, 'PNG', 15, topMarginAfterTime, historicalCanvas.width / 8, historicalCanvas.height / 8);
+            var historicalImageWidth = Const.imageWidth;
+            var historicalImageHeight = historicalCanvas.height * historicalImageWidth / historicalCanvas.width;
+            doc.addImage(historicalImageData, 'PNG', leftMargin, topMarginAfterTime, historicalImageWidth, historicalImageHeight);
 
-            var historicalTextLines = doc.splitTextToSize(this.historicalAcceptanceText.val, (pdfInMM - leftMargin - rightMargin));
-            doc.text(leftMargin, topMarginAfterTime + historicalCanvas.height / 8 + 5, historicalTextLines);
+            var historicalTextLines = doc.splitTextToSize(this.historicalAcceptanceText.val, contentWidth);
+            doc.text(leftMargin, topMarginAfterTime + historicalImageHeight + 20, historicalTextLines);
 
             if (numOfAddedSections % 2 == 1) {
               var historicalTextLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * historicalTextLines.length;
-              topMarginAfterHistorical = topMarginAfterTime + historicalCanvas.height / 8 + historicalTextLinesHeight - 10;
+              topMarginAfterHistorical = topMarginAfterTime + historicalImageHeight + historicalTextLinesHeight + 20;
             }
           }
 
@@ -687,19 +768,21 @@ export default {
             if (this.acceptanceRateByTrackChartIncluded) {
               if (numOfAddedSections % 2 == 0 && numOfAddedSections > 0) {
                 doc.addPage();
-                topMarginAfterHistorical = Const.pdfTopMargin;
+                topMarginAfterHistorical = Const.topMargin;
               }
 
               numOfAddedSections += 1;
               var acceptImageData = acceptanceCanvas.toDataURL("image/png");
-              doc.addImage(acceptImageData, 'PNG', 15, topMarginAfterHistorical, acceptanceCanvas.width / 8, acceptanceCanvas.height / 8);
+              var acceptImageWidth = Const.imageWidth;
+              var acceptImageHeight = acceptanceCanvas.height * acceptImageWidth / acceptanceCanvas.width;
+              doc.addImage(acceptImageData, 'PNG', leftMargin, topMarginAfterHistorical, acceptImageWidth, acceptImageHeight);
 
-              var acceptTextLines = doc.splitTextToSize(this.acceptanceRateByTrackText.val, (pdfInMM - leftMargin - rightMargin));
-              doc.text(leftMargin, topMarginAfterHistorical + acceptanceCanvas.height / 8 + 5, acceptTextLines);
+              var acceptTextLines = doc.splitTextToSize(this.acceptanceRateByTrackText.val, contentWidth);
+              doc.text(leftMargin, topMarginAfterHistorical + acceptImageHeight + 20, acceptTextLines);
 
               if (numOfAddedSections % 2 == 1) {
                 var acceptanceLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * acceptTextLines.length;
-                topMarginAfterAccept = topMarginAfterHistorical + acceptanceCanvas.height / 8 + acceptanceLinesHeight - 20;
+                topMarginAfterAccept = topMarginAfterHistorical + acceptImageHeight + acceptanceLinesHeight + 20;
               }
             }
 
@@ -708,19 +791,21 @@ export default {
               if (this.topAcceptedAuthorsChartIncluded) {
                 if (numOfAddedSections % 2 == 0 && numOfAddedSections > 0) {
                   doc.addPage();
-                  topMarginAfterAccept = Const.pdfTopMargin;
+                  topMarginAfterAccept = Const.topMargin;
                 }
 
                 numOfAddedSections += 1;
                 var accAuthorImageData = accAuthorCanvas.toDataURL("image/png");
-                doc.addImage(accAuthorImageData, 'PNG', 15, topMarginAfterAccept, accAuthorCanvas.width / 8, accAuthorCanvas.height / 8);
+                var accAuthorImageWidth = Const.imageWidth;
+                var accAuthorImageHeight = accAuthorCanvas.height * accAuthorImageWidth / accAuthorCanvas.width;
+                doc.addImage(accAuthorImageData, 'PNG', leftMargin, topMarginAfterAccept, accAuthorImageWidth, accAuthorImageHeight);
 
-                var topAccAuthorsTextLines = doc.splitTextToSize(this.topAcceptedAuthorsText.val, (pdfInMM - leftMargin - rightMargin));
-                doc.text(leftMargin, topMarginAfterAccept + accAuthorCanvas.height / 8 + 5, topAccAuthorsTextLines);
+                var topAccAuthorsTextLines = doc.splitTextToSize(this.topAcceptedAuthorsText.val, contentWidth);
+                doc.text(leftMargin, topMarginAfterAccept + accAuthorImageHeight + 20, topAccAuthorsTextLines);
 
                 if (numOfAddedSections % 2 == 1) {
                   var topAccAuthorsTextLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * topAccAuthorsTextLines.length;
-                  topMarginAfterTopAccAuthors = topMarginAfterAccept + accAuthorCanvas.height / 8 + topAccAuthorsTextLinesHeight - 10;
+                  topMarginAfterTopAccAuthors = topMarginAfterAccept + accAuthorImageHeight + topAccAuthorsTextLinesHeight + 20;
                 }
               }
 
@@ -729,20 +814,22 @@ export default {
                 if (this.topAcceptedAuthorsByTrackChartIncluded) {
                   if (numOfAddedSections % 2 == 0 && numOfAddedSections > 0) {
                     doc.addPage();
-                    topMarginAfterTopAccAuthors = Const.pdfTopMargin;
+                    topMarginAfterTopAccAuthors = Const.topMargin;
                   }
 
                   numOfAddedSections += 1;
 
                   var accAuthorTrackImageData = accAuthorTrackCanvas.toDataURL("image/png");
-                  doc.addImage(accAuthorTrackImageData, 'PNG', 15, topMarginAfterTopAccAuthors, accAuthorTrackCanvas.width / 8, accAuthorTrackCanvas.height / 8);
+                  var accAuthorTrackImageWidth = Const.imageWidth;
+                  var accAuthorTrackImageHeight = accAuthorTrackCanvas.height * accAuthorTrackImageWidth / accAuthorTrackCanvas.width;
+                  doc.addImage(accAuthorTrackImageData, 'PNG', leftMargin, topMarginAfterTopAccAuthors, accAuthorTrackImageWidth, accAuthorTrackImageHeight);
 
-                  var topAccAuthorsTrackTextLines = doc.splitTextToSize(this.topAcceptedAuthorsByTrackText.val, (pdfInMM - leftMargin - rightMargin));
-                  doc.text(leftMargin, topMarginAfterTopAccAuthors + accAuthorTrackCanvas.height / 8 + 5, topAccAuthorsTrackTextLines);
+                  var topAccAuthorsTrackTextLines = doc.splitTextToSize(this.topAcceptedAuthorsByTrackText.val, contentWidth);
+                  doc.text(leftMargin, topMarginAfterTopAccAuthors + accAuthorTrackImageHeight + 20, topAccAuthorsTrackTextLines);
 
                   if (numOfAddedSections % 2 == 1) {
                     var topAccAuthorsTrackLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * topAccAuthorsTrackTextLines.length;
-                    topMarginAfterTopAccAuthorsTrack = topMarginAfterTopAccAuthors + accAuthorTrackCanvas.height / 8 + topAccAuthorsTrackLinesHeight;
+                    topMarginAfterTopAccAuthorsTrack = topMarginAfterTopAccAuthors + accAuthorTrackImageHeight + topAccAuthorsTrackLinesHeight + 20;
                   }
                 }
 
@@ -751,11 +838,13 @@ export default {
                   if (this.wordCloudAllIncluded) {
                     if (numOfAddedSections % 2 == 0 && numOfAddedSections > 0 ) {
                       doc.addPage();
-                      topMarginAfterTopAccAuthorsTrack = Const.pdfTopMargin;
+                      topMarginAfterTopAccAuthorsTrack = Const.topMargin;
                     }
 
                     var wordAllImageData = wordAllCanvas.toDataURL("image/png");
-                    doc.addImage(wordAllImageData, 'PNG', 15, topMarginAfterTopAccAuthorsTrack, wordAllCanvas.width / 8, wordAllCanvas.height / 8);
+                    var wordAllImageWidth = Const.imageWidth;
+                    var wordAllImageHeight = wordAllCanvas.height * wordAllImageWidth / wordAllCanvas.width;
+                    doc.addImage(wordAllImageData, 'PNG', leftMargin, topMarginAfterTopAccAuthorsTrack, wordAllImageWidth, wordAllImageHeight);
                   }
                   
                   doc.save(fileName + '.pdf');
@@ -771,17 +860,17 @@ export default {
     },
     saveReview: function() {
       let fileName = 'Review Visual Analysis';
-      var leftMargin = Const.pdfLeftMargin;
-      var rightMargin = Const.pdfRightMargin;
-      var pdfInMM = Const.pdfInMM;
-      var initialTopMargin = Const.pdfTopMargin;
-      var doc = new jsPDF("p", "mm", "a4");
+      var leftMargin = Const.leftMargin;
+      var rightMargin = Const.rightMargin;
+      var contentWidth = Const.contentWidth;
+      var initialTopMargin = Const.topMargin;
+      var doc = new jsPDF("p", "pt");
       var title = "Review Visual Analysis";
       doc.setFont("Times");
       doc.setFontSize(Const.pdfTitleFontSize);
-      var titleLength = doc.getStringUnitWidth(title) * Const.pdfTitleFontSize * Const.pdfMMPerPT;
-      doc.text((pdfInMM - leftMargin - rightMargin - titleLength) / 2.0 + leftMargin, initialTopMargin, title);
-      var startingTopMargin = initialTopMargin + Const.pdfTitleFontSize * Const.pdfMMPerPT;
+      var titleLength = doc.getStringUnitWidth(title) * Const.pdfTitleFontSize;
+      doc.text((contentWidth - titleLength) / 2.0 + leftMargin, initialTopMargin, title);
+      var startingTopMargin = initialTopMargin + Const.pdfTitleFontSize;
       doc.setFontSize(Const.pdfTextFontSize);
 
       var numOfAddedSections = 0;
@@ -792,13 +881,15 @@ export default {
           numOfAddedSections += 1;
 
           var scoreImageData = scoreCanvas.toDataURL("image/png");
-          doc.addImage(scoreImageData, 'PNG', 15, startingTopMargin, scoreCanvas.width / 8, scoreCanvas.height / 8);
+          var scoreImageWidth = Const.imageWidth;
+          var scoreImageHeight = scoreCanvas.height * scoreImageWidth / scoreCanvas.width;
+          doc.addImage(scoreImageData, 'PNG', leftMargin, startingTopMargin, scoreImageWidth, scoreImageHeight);
 
-          var scoreTextLines = doc.splitTextToSize(this.scoreDistributionText.val, (pdfInMM - leftMargin - rightMargin));
-          doc.text(leftMargin, startingTopMargin + scoreCanvas.height / 8 + 10, scoreTextLines);
+          var scoreTextLines = doc.splitTextToSize(this.scoreDistributionText.val, contentWidth);
+          doc.text(leftMargin, startingTopMargin + scoreImageHeight + 20, scoreTextLines);
 
           var scoreTextHeight = Const.pdfLineHeight * Const.pdfTextFontSize * scoreTextLines.length;
-          var topMarginAfterScore = startingTopMargin + scoreCanvas.height / 8 + scoreTextHeight - 35;
+          var topMarginAfterScore = startingTopMargin + scoreImageHeight + scoreTextHeight + 20;
 
         }
 
@@ -807,14 +898,16 @@ export default {
           if (this.recommendDistributionChartIncluded) {
             numOfAddedSections += 1;
             var recommendImageData = recommendCanvas.toDataURL("image/png");
-            doc.addImage(recommendImageData, 'PNG', 15, topMarginAfterScore, recommendCanvas.width / 8, recommendCanvas.height / 8);
+            var recommendImageWidth = Const.imageWidth;
+            var recommendImageHeight = recommendCanvas.height * recommendImageWidth / recommendCanvas.width;
+            doc.addImage(recommendImageData, 'PNG', leftMargin, topMarginAfterScore, recommendImageWidth, recommendImageHeight);
 
-            var recommendTextLines = doc.splitTextToSize(this.recommendDistributionText.val, (pdfInMM - leftMargin - rightMargin));
-            doc.text(leftMargin, topMarginAfterScore + recommendCanvas.height / 8 + 10, recommendTextLines);
+            var recommendTextLines = doc.splitTextToSize(this.recommendDistributionText.val, contentWidth);
+            doc.text(leftMargin, topMarginAfterScore + recommendImageHeight + 20, recommendTextLines);
 
             if (numOfAddedSections % 2 == 1) {
               var recommendTextLinesHeight = Const.pdfLineHeight * Const.pdfTextFontSize * recommendTextLines.length;
-              topMarginAfterRecommend = topMarginAfterScore + recommendCanvas.height / 8 + recommendTextLinesHeight - 20;
+              topMarginAfterRecommend = topMarginAfterScore + recommendImageHeight + recommendTextLinesHeight + 20;
             }
           }
 
@@ -822,13 +915,15 @@ export default {
             if (this.reviewTableIncluded) {
               if (numOfAddedSections % 2 == 0 && numOfAddedSections > 0) {
                 doc.addPage();
-                topMarginAfterRecommend = Const.pdfTopMargin;
+                topMarginAfterRecommend = Const.topMargin;
               }
               var tableImageData = tableCanvas.toDataURL("image/png");
-              doc.addImage(tableImageData, 'PNG', 30, topMarginAfterRecommend, tableCanvas.width / 10, tableCanvas.height / 10);
+              var tableImageWidth = Const.imageWidth;
+              var tableImageHeight = tableCanvas.height * tableImageWidth / tableCanvas.width;
+              doc.addImage(tableImageData, 'PNG', leftMargin, topMarginAfterRecommend, tableImageWidth, tableImageHeight);
 
-              var tableTextLines = doc.splitTextToSize(this.reviewTableText.val, (pdfInMM - leftMargin - rightMargin));
-              doc.text(leftMargin, topMarginAfterRecommend + tableCanvas.height / 10 + 10, tableTextLines);
+              var tableTextLines = doc.splitTextToSize(this.reviewTableText.val, contentWidth);
+              doc.text(leftMargin, topMarginAfterRecommend + tableImageHeight + 20, tableTextLines);
             }
             
             doc.save(fileName + '.pdf');
